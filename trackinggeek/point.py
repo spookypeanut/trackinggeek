@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Point(object):
-    def __init__(self, long, lat):
+    def __init__(self, lat, long):
         """ A point on the Earth's surface
         """
-        self.long = float(long)
         self.lat = float(lat)
+        self.long = float(long)

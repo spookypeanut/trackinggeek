@@ -16,15 +16,20 @@
 
 from trackinggeek.canvas import Canvas
 from trackinggeek.point import Point
+import gpxpy
 
+GPX_PATH = "./example/test.gpx"
 OUTPUT_PATH = "/tmp/test.png"
-IMAGE_WIDTH = 128
-IMAGE_HEIGHT = 128
+IMAGE_WIDTH = 512
+IMAGE_HEIGHT = 512
 
+gpx_file = open(GPX_PATH, "r")
+parsed_file = gpxpy.parse(gpx_file)
 c = Canvas((-1, 10), (-10, 100), (IMAGE_WIDTH, IMAGE_HEIGHT))
+c = Canvas((51.51550, 51.53232), (-0.14138, -0.12016), (IMAGE_WIDTH, IMAGE_HEIGHT))
 
-for x in [float(x) / 10 for x in xrange(0, 100)]:
-    p = Point(x, x*x)
+for eachpoint in parsed_file.get_points_data():
+    p = Point(eachpoint.point.latitude, eachpoint.point.longitude)
     print ("Doing pixel %s, %s" % (p.long, p.lat))
     c._draw_point(p)
 

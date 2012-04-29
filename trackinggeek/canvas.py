@@ -22,7 +22,8 @@ MODE = "L"
 DRAW_COLOR = 255
 
 class Canvas(object):
-    def __init__(self, longitude_range, latitude_range, pixel_dimensions):
+    def __init__(self, latitude_range, longitude_range,
+                 pixel_dimensions, max=True):
         self.image = Image.new(MODE, pixel_dimensions)
         self.pixel_width, self.pixel_height = pixel_dimensions
         self.min_longitude = float(longitude_range[0])
