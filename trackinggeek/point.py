@@ -14,18 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from trackinggeek.canvas import Canvas
-from trackinggeek.point import Point
-
-OUTPUT_PATH = "/tmp/test.png"
-IMAGE_WIDTH = 128
-IMAGE_HEIGHT = 128
-
-c = Canvas((-1, 10), (-10, 100), (IMAGE_WIDTH, IMAGE_HEIGHT))
-
-for x in [float(x) / 10 for x in xrange(0, 100)]:
-    p = Point(x, x*x)
-    print ("Doing pixel %s, %s" % (p.long, p.lat))
-    c._draw_point(p)
-
-c.save(OUTPUT_PATH)
+class Point(object):
+    def __init__(self, long, lat):
+        """ A point on the Earth's surface
+        """
+        self.long = float(long)
+        self.lat = float(lat)
