@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import Image
+import gpxpy
+from .point import Point
 
 #MODE = "RGBA"
 MODE = "L"
@@ -49,6 +51,16 @@ class Canvas(object):
         pixel = self._convert_to_pixels(point)
         print ("Drawing pixel %s" % (pixel,))
         self.image.putpixel(pixel, DRAW_COLOR)
+
+    def add_track(self, path):
+        gpx_file = open(path, "r")
+        self.tracks.append(gpxpy.parse(gpx_file))
+
+    def draw(self):
+        for track in self.tracks:
+            for eachpoint in track.get_points_data():
+                p = Point(eachpoint.point.latitude, eachpoint.point.longitude)
+                self._draw_point(p)
 
     def save(self, path):
         self.image.save(path)
