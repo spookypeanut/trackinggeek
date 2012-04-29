@@ -21,7 +21,7 @@ OUTPUT_PATH = "/tmp/test.png"
 IMAGE_WIDTH = 512
 IMAGE_HEIGHT = 512
 
-c = Canvas((51.51550, 51.53232), (-0.14138, -0.12016), (IMAGE_WIDTH, IMAGE_HEIGHT))
+c = Canvas(pixel_dimensions=(IMAGE_WIDTH, IMAGE_HEIGHT))
 c.add_track(GPX_PATH)
 c.draw()
 c.save(OUTPUT_PATH)

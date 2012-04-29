@@ -24,19 +24,24 @@ MODE = "L"
 DRAW_COLOR = 255
 
 class Canvas(object):
-    def __init__(self, latitude_range, longitude_range,
-                 pixel_dimensions, max=True):
+    def __init__(self, latitude_range=None, longitude_range=None,
+                 pixel_dimensions=None, max=True):
         self.image = Image.new(MODE, pixel_dimensions)
         self.pixel_width, self.pixel_height = pixel_dimensions
-        self.min_longitude = float(longitude_range[0])
-        self.max_longitude = float(longitude_range[1])
-        self.min_latitude = float(latitude_range[0])
-        self.max_latitude = float(latitude_range[1])
+
+        if latitude_range:
+            self.min_latitude = float(latitude_range[0])
+            self.max_latitude = float(latitude_range[1])
+        if longitude_range:
+            self.min_longitude = float(longitude_range[0])
+            self.max_longitude = float(longitude_range[1])
+
+        self.tracks = []
 
     def _convert_to_pixels(self, point):
-        x = int(self.pixel_width * (point.long - self.min_longitude) /
+        x = int((self.pixel_width - 1) * (point.long - self.min_longitude) /
                                    (self.max_longitude - self.min_longitude))
-        y = self.pixel_height - int(self.pixel_height *
+        y = self.pixel_height - 1 - int((self.pixel_height - 1)*
                         (point.lat - self.min_latitude) /
                         (self.max_latitude - self.min_latitude))
         return (x, y)
@@ -50,11 +55,35 @@ class Canvas(object):
 
         pixel = self._convert_to_pixels(point)
         print ("Drawing pixel %s" % (pixel,))
-        self.image.putpixel(pixel, DRAW_COLOR)
+        try:
+            self.image.putpixel(pixel, DRAW_COLOR)
+        except IndexError:
+            print("Putting %s failed" % (pixel,))
 
     def add_track(self, path):
         gpx_file = open(path, "r")
-        self.tracks.append(gpxpy.parse(gpx_file))
+        parsed = gpxpy.parse(gpx_file)
+        self.tracks.append(parsed)
+        bounds = parsed.get_bounds()
+        if len(self.tracks) == 1:
+            print ("Setting ranges:")
+            self.min_latitude = bounds.min_latitude
+            self.max_latitude = bounds.max_latitude
+            print("latitude = %s - %s" % (self.min_latitude,
+                self.max_latitude))
+            self.min_longitude = bounds.min_longitude
+            self.max_longitude = bounds.max_longitude
+            print("longitude = %s - %s" % (self.min_longitude,
+                self.max_longitude))
+            return
+        if self.min_latitude > bounds.min_latitude:
+            self.min_latitude = bounds.min_latitude
+        if self.max_latitude < bounds.max_latitude:
+            self.max_latitude = bounds.max_latitude
+        if self.min_longitude > bounds.min_longitude:
+            self.min_longitude = bounds.min_longitude
+        if self.max_longitude < bounds.max_longitude:
+            self.max_longitude = bounds.max_longitude
 
     def draw(self):
         for track in self.tracks:
