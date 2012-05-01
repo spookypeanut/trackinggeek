@@ -16,12 +16,16 @@
 
 from trackinggeek.canvas import Canvas
 
-GPX_PATH = "./example/test.gpx"
+#GPX_PATHS = ["./example/test2.gpx"]
+             
+GPX_PATHS = ["./example/test.gpx",
+             "./example/test2.gpx",
+             "./example/test3.gpx"]
 OUTPUT_PATH = "/tmp/test.png"
-IMAGE_WIDTH = 512
-IMAGE_HEIGHT = 512
+IMAGE_SIZE = 512 
 
-c = Canvas(pixel_dimensions={"width":IMAGE_WIDTH})
-c.add_track(GPX_PATH)
+c = Canvas(pixel_dimensions={"max":IMAGE_SIZE})
+for path in GPX_PATHS:
+    c.add_track(path)
 c.draw()
 c.save(OUTPUT_PATH)
