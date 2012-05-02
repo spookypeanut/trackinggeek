@@ -119,6 +119,8 @@ class Canvas(object):
             self.ctx.line_to(*self._convert_to_fraction(next_point))
 
         self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
+        self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
         self.ctx.set_line_width(1.0 / self.pixel_width)
         self.ctx.stroke()
     
