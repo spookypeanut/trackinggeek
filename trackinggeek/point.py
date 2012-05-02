@@ -20,3 +20,7 @@ class Point(object):
         """
         self.lat = float(lat)
         self.long = float(long)
+
+    def __repr__(self):
+        return "trackinggeek.Point(latitude=%s, longitude=%s)" % (self.lat,
+                self.long)
