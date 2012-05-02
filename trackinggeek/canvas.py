@@ -116,12 +116,10 @@ class Canvas(object):
         for eachpoint in point_generator:
             next_point = Point(eachpoint.point.latitude,
                                eachpoint.point.longitude)
-            #print next_point
             self.ctx.line_to(*self._convert_to_fraction(next_point))
-        self.ctx.close_path()
 
         self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
-        self.ctx.set_line_width(0.02)
+        self.ctx.set_line_width(1.0 / self.pixel_width)
         self.ctx.stroke()
     
 
