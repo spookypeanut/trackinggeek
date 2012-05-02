@@ -150,15 +150,15 @@ class Canvas(object):
 
     def draw(self):
         self._calc_pixel_dimensions(self.pixel_dimensions)
-        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                                           self.pixel_width,
-                                           self.pixel_height)
+        self.surface = cairo.SVGSurface("/tmp/test.svg",
+                                        self.pixel_width,
+                                        self.pixel_height)
         self.ctx = cairo.Context(self.surface)
         self.ctx.scale (self.pixel_width, self.pixel_height)
 
         for track in self.tracks:
             self._draw_track(track)
 
-    def save(self, path):
+    def save_png(self, path):
         self.surface.write_to_png(path)
 
