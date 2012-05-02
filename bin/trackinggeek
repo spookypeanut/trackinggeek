@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import argparse
 from trackinggeek.canvas import Canvas
 
 #GPX_PATHS = ["./example/test2.gpx"]
@@ -27,6 +28,21 @@ OUTPUT_PATH = "/tmp/test.png"
 IMAGE_SIZE = 512 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inputdir', action='store',
+                        help='path to the directory of gpx files')
+    parser.add_argument('--outsvg', action='store',
+                        help='path to the output svg')
+    parser.add_argument('--outpng', action='store',
+                        help='path to the output png')
+    parser.add_argument('--resolution', action='store',
+                        help='absolute resolution of the output image')
+    parser.add_argument('--max-dimension', action='store',
+                        help='the maximum of either dimension of the'
+                        'output image')
+    parser.add_argument('--min-dimension', action='store',
+                        help='the minimum of either dimension of the'
+                        'output image')
     c = Canvas(pixel_dimensions={"max":IMAGE_SIZE})
     for path in GPX_PATHS:
         c.add_track(path)
