@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Image
+import cairo
 import gpxpy
 from .point import Point
 
@@ -27,6 +27,7 @@ DEFAULT_SIZE = 1024
 class Canvas(object):
     def __init__(self, latitude_range=None, longitude_range=None,
                  pixel_dimensions=None):
+        # TODO: Have ability to override the automatic lat/long range
         if latitude_range:
             self.min_latitude = float(latitude_range[0])
             self.max_latitude = float(latitude_range[1])
@@ -73,6 +74,14 @@ class Canvas(object):
         print pixel_dimensions
         raise ValueError("Could not calculate the image resolution")
 
+    def _convert_to_fraction(self, point):
+        x = (point.long - self.min_longitude) / \
+            (self.max_longitude - self.min_longitude)
+        y = 1 - (point.lat - self.min_latitude) / \
+                (self.max_latitude - self.min_latitude)
+        print ("Converted to %s, %s" % (x, y))
+        return (x, y)
+
     def _convert_to_pixels(self, point):
         x = int((self.pixel_width - 1) * (point.long - self.min_longitude) /
                                    (self.max_longitude - self.min_longitude))
@@ -95,6 +104,26 @@ class Canvas(object):
             self.image.putpixel(pixel, DRAW_COLOR)
         except IndexError:
             print("Putting %s failed" % (pixel,))
+
+    def _draw_track(self, track):
+        point_generator = (p for p in track.get_points_data())
+        first = point_generator.next().point
+        print("Starting at %s" % first)
+        pixels = self._convert_to_fraction(Point(first.latitude,
+            first.longitude))
+        print pixels
+        self.ctx.move_to(*pixels)
+        for eachpoint in point_generator:
+            next_point = Point(eachpoint.point.latitude,
+                               eachpoint.point.longitude)
+            #print next_point
+            self.ctx.line_to(*self._convert_to_fraction(next_point))
+        self.ctx.close_path()
+
+        self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
+        self.ctx.set_line_width(0.02)
+        self.ctx.stroke()
+    
 
     def add_track(self, path):
         gpx_file = open(path, "r")
@@ -123,13 +152,15 @@ class Canvas(object):
 
     def draw(self):
         self._calc_pixel_dimensions(self.pixel_dimensions)
-        self.image = Image.new(MODE, (self.pixel_width, self.pixel_height))
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
+                                           self.pixel_width,
+                                           self.pixel_height)
+        self.ctx = cairo.Context(self.surface)
+        self.ctx.scale (self.pixel_width, self.pixel_height)
 
         for track in self.tracks:
-            for eachpoint in track.get_points_data():
-                p = Point(eachpoint.point.latitude, eachpoint.point.longitude)
-                self._draw_point(p)
+            self._draw_track(track)
 
     def save(self, path):
-        self.image.save(path)
+        self.surface.write_to_png(path)
 
