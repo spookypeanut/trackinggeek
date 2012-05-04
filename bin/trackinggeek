@@ -37,17 +37,35 @@ def main():
                         help='path to the output png')
     parser.add_argument('--resolution', action='store',
                         help='absolute resolution of the output image')
-    parser.add_argument('--max-dimension', action='store',
+    parser.add_argument('--max', action='store',
                         help='the maximum of either dimension of the'
                         'output image')
-    parser.add_argument('--min-dimension', action='store',
+    parser.add_argument('--min', action='store',
                         help='the minimum of either dimension of the'
                         'output image')
-    c = Canvas(pixel_dimensions={"max":IMAGE_SIZE})
+    args = parser.parse_args()
+    
+    pixel_dimensions = {}
+    if "min" in args and args.min:
+        pixel_dimensions["min"] = int(args.min)
+    if "max" in args and args.max:
+        pixel_dimensions["max"] = int(args.max)
+    if "resolution" in args and args.resolution:
+        if not "x" in args.resolution:
+            x = y = args.resolution
+        else:
+            (x, y) = args.resolution.split("x")
+        if x:
+            pixel_dimensions["width"] = int(x)
+        if y:
+            pixel_dimensions["height"] = int(y)
+
+    print pixel_dimensions
+    c = Canvas(pixel_dimensions=pixel_dimensions)
     for path in GPX_PATHS:
         c.add_track(path)
     c.draw()
-    c.save(OUTPUT_PATH)
+    c.save_png(OUTPUT_PATH)
 
 if __name__ == "__main__":
     sys.exit(main())
