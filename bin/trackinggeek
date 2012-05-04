@@ -60,12 +60,14 @@ def main():
         if y:
             pixel_dimensions["height"] = int(y)
 
-    print pixel_dimensions
     c = Canvas(pixel_dimensions=pixel_dimensions)
     for path in GPX_PATHS:
         c.add_track(path)
     c.draw()
-    c.save_png(OUTPUT_PATH)
+    if args.outpng:
+        c.save_png(args.outpng)
+    if args.outsvg:
+        c.save_svg(args.outsvg)
 
 if __name__ == "__main__":
     sys.exit(main())

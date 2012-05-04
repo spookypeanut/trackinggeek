@@ -168,3 +168,6 @@ class Canvas(object):
     def save_png(self, path):
         self.surface.write_to_png(path)
 
+    def save_svg(self, path):
+        self.surface.finish()
+        raise NotImplementedError
