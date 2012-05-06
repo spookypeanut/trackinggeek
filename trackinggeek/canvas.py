@@ -83,7 +83,6 @@ class Canvas(object):
             (self.max_longitude - self.min_longitude)
         y = 1 - (point.lat - self.min_latitude) / \
                 (self.max_latitude - self.min_latitude)
-        print ("Converted to %s, %s" % (x, y))
         return (x, y)
 
     def _convert_to_pixels(self, point):
