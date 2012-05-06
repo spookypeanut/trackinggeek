@@ -108,24 +108,25 @@ class Canvas(object):
         except IndexError:
             print("Putting %s failed" % (pixel,))
 
-    def _draw_track(self, track):
-        point_generator = (p for p in track.get_points_data())
-        first = point_generator.next().point
-        print("Starting at %s" % first)
-        pixels = self._convert_to_fraction(Point(first.latitude,
-            first.longitude))
-        print pixels
-        self.ctx.move_to(*pixels)
-        for eachpoint in point_generator:
-            next_point = Point(eachpoint.point.latitude,
-                               eachpoint.point.longitude)
-            self.ctx.line_to(*self._convert_to_fraction(next_point))
+    def _draw_track(self, parsed_gpx):
+        for track in parsed_gpx.tracks:
+            for segment in track.segments:
+                point_generator = (p for p in segment.points)
+                first = point_generator.next()
+                print("Starting at %s" % first)
+                pixels = self._convert_to_fraction(Point(first.latitude,
+                    first.longitude))
+                self.ctx.move_to(*pixels)
+                for eachpoint in point_generator:
+                    next_point = Point(eachpoint.latitude,
+                                       eachpoint.longitude)
+                    self.ctx.line_to(*self._convert_to_fraction(next_point))
 
-        self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
-        self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-        self.ctx.set_line_width(1.0 / self.pixel_width)
-        self.ctx.stroke()
+                self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
+                self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+                self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+                self.ctx.set_line_width(1.0 / self.pixel_width)
+                self.ctx.stroke()
     
 
     def add_track(self, path):
