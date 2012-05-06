@@ -19,13 +19,12 @@ import sys
 import argparse
 from trackinggeek.canvas import Canvas
 
-#GPX_PATHS = ["./example/test2.gpx"]
+#GPX_PATHS = ["./example/test4.gpx"]
              
 GPX_PATHS = ["./example/test.gpx",
              "./example/test2.gpx",
-             "./example/test3.gpx"]
-OUTPUT_PATH = "/tmp/test.png"
-IMAGE_SIZE = 512 
+             "./example/test3.gpx",
+             "./example/test4.gpx"]
 
 def main():
     parser = argparse.ArgumentParser()
