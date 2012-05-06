@@ -131,7 +131,11 @@ class Canvas(object):
 
     def add_track(self, path):
         gpx_file = open(path, "r")
-        parsed = gpxpy.parse(gpx_file)
+        try:
+            parsed = gpxpy.parse(gpx_file)
+        except Exception:
+            print("The file %s did not parse correctly, skipping" % path)
+            return
         self.tracks.append(parsed)
         bounds = parsed.get_bounds()
         if len(self.tracks) == 1:
