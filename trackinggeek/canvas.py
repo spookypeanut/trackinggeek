@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import cairo
 import gpxpy
 from .point import Point
@@ -128,7 +129,6 @@ class Canvas(object):
                 self.ctx.set_line_width(1.0 / self.pixel_width)
                 self.ctx.stroke()
     
-
     def add_track(self, path):
         gpx_file = open(path, "r")
         try:
@@ -157,6 +157,18 @@ class Canvas(object):
             self.min_longitude = bounds.min_longitude
         if self.max_longitude < bounds.max_longitude:
             self.max_longitude = bounds.max_longitude
+
+    def add_directory(self, directory):
+        for dir_path, _, filenames in os.walk(directory):
+            gpxfiles = [filename for filename in filenames if
+                    os.path.splitext(filename)[1] == ".gpx"]
+            print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
+                len(filenames), dir_path))
+            counter = 1
+            for i in gpxfiles:
+                print("Adding file %4d/%4d: %s" % (counter, len(gpxfiles), i))
+                self.add_track(os.path.join(dir_path, i))
+                counter += 1
 
     def draw(self):
         self._calc_pixel_dimensions(self.pixel_dimensions)

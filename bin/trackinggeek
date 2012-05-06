@@ -19,13 +19,6 @@ import sys
 import argparse
 from trackinggeek.canvas import Canvas
 
-#GPX_PATHS = ["./example/test4.gpx"]
-             
-GPX_PATHS = ["./example/test.gpx",
-             "./example/test2.gpx",
-             "./example/test3.gpx",
-             "./example/test4.gpx"]
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--inputdir', action='store',
@@ -60,8 +53,8 @@ def main():
             pixel_dimensions["height"] = int(y)
 
     c = Canvas(pixel_dimensions=pixel_dimensions)
-    for path in GPX_PATHS:
-        c.add_track(path)
+    if args.inputdir:
+        c.add_directory(args.inputdir)
     c.draw()
     if args.outpng:
         c.save_png(args.outpng)
