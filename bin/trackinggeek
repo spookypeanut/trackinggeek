@@ -35,9 +35,35 @@ def main():
     parser.add_argument('--min', action='store',
                         help='the minimum of either dimension of the'
                         'output image')
+    parser.add_argument('--latitude', action='store',
+                        help='the latitude range to use, e.g. 43.1,45.6')
+    parser.add_argument('--longitude', action='store',
+                        help='the longitude range to use, e.g. -2.3,1.2')
     args = parser.parse_args()
     
     pixel_dimensions = {}
+    if "latitude" in args:
+        try:
+            min_latitude, max_latitude = args.latitude.split(",")
+            latitude_range = (min_latitude, max_latitude)
+        except ValueError:
+            print("Latitude format invalid")
+            parser.print_help()
+            return 1
+    else:
+        latitude_range = None
+
+    if "longitude" in args:
+        try:
+            min_longitude, max_longitude = args.longitude.split(",")
+            longitude_range = (min_longitude, max_longitude)
+        except ValueError:
+            print("Longitude format invalid")
+            parser.print_help()
+            return 1
+    else:
+        longitude_range = None
+
     if "min" in args and args.min:
         pixel_dimensions["min"] = int(args.min)
     if "max" in args and args.max:
@@ -52,7 +78,9 @@ def main():
         if y:
             pixel_dimensions["height"] = int(y)
 
-    c = Canvas(pixel_dimensions=pixel_dimensions)
+    c = Canvas(pixel_dimensions=pixel_dimensions,
+               latitude_range=latitude_range,
+               longitude_range=longitude_range)
     if args.inputdir:
         c.add_directory(args.inputdir)
     c.draw()

@@ -140,23 +140,23 @@ class Canvas(object):
         bounds = parsed.get_bounds()
         if len(self.tracks) == 1:
             print ("Setting ranges:")
-            self.min_latitude = bounds.min_latitude
-            self.max_latitude = bounds.max_latitude
-            print("latitude = %s - %s" % (self.min_latitude,
-                self.max_latitude))
-            self.min_longitude = bounds.min_longitude
-            self.max_longitude = bounds.max_longitude
-            print("longitude = %s - %s" % (self.min_longitude,
-                self.max_longitude))
+            self.auto_min_latitude = bounds.min_latitude
+            self.auto_max_latitude = bounds.max_latitude
+            print("latitude = %s - %s" % (self.auto_min_latitude,
+                                          self.auto_max_latitude))
+            self.auto_min_longitude = bounds.min_longitude
+            self.auto_max_longitude = bounds.max_longitude
+            print("longitude = %s - %s" % (self.auto_min_longitude,
+                                           self.auto_max_longitude))
             return
-        if self.min_latitude > bounds.min_latitude:
-            self.min_latitude = bounds.min_latitude
-        if self.max_latitude < bounds.max_latitude:
-            self.max_latitude = bounds.max_latitude
-        if self.min_longitude > bounds.min_longitude:
-            self.min_longitude = bounds.min_longitude
-        if self.max_longitude < bounds.max_longitude:
-            self.max_longitude = bounds.max_longitude
+        if self.auto_min_latitude > bounds.min_latitude:
+            self.auto_min_latitude = bounds.min_latitude
+        if self.auto_max_latitude < bounds.max_latitude:
+            self.auto_max_latitude = bounds.max_latitude
+        if self.auto_min_longitude > bounds.min_longitude:
+            self.auto_min_longitude = bounds.min_longitude
+        if self.auto_max_longitude < bounds.max_longitude:
+            self.auto_max_longitude = bounds.max_longitude
 
     def add_directory(self, directory):
         for dir_path, _, filenames in os.walk(directory):
@@ -171,6 +171,14 @@ class Canvas(object):
                 counter += 1
 
     def draw(self):
+        if not self.min_latitude:
+            self.min_latitude = self.auto_min_latitude
+        if not self.max_latitude:
+            self.max_latitude = self.auto_max_latitude
+        if not self.min_longitude:
+            self.min_longitude = self.auto_min_longitude
+        if not self.max_longitude:
+            self.max_longitude = self.auto_max_longitude
         self._calc_pixel_dimensions(self.pixel_dimensions)
         self.surface = cairo.SVGSurface("/tmp/test.svg",
                                         float(self.pixel_width),
