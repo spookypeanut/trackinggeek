@@ -32,9 +32,16 @@ class Canvas(object):
         if latitude_range:
             self.min_latitude = float(latitude_range[0])
             self.max_latitude = float(latitude_range[1])
+        else:
+            self.min_latitude = None
+            self.max_latitude = None
+
         if longitude_range:
             self.min_longitude = float(longitude_range[0])
             self.max_longitude = float(longitude_range[1])
+        else:
+            self.min_longitude = None
+            self.max_longitude = None
 
         self.pixel_dimensions = pixel_dimensions
         self.tracks = []

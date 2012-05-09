@@ -42,7 +42,7 @@ def main():
     args = parser.parse_args()
     
     pixel_dimensions = {}
-    if "latitude" in args:
+    if "latitude" in args and args.latitude is not None:
         try:
             min_latitude, max_latitude = args.latitude.split(",")
             latitude_range = (min_latitude, max_latitude)
@@ -53,7 +53,7 @@ def main():
     else:
         latitude_range = None
 
-    if "longitude" in args:
+    if "longitude" in args and args.longitude is not None:
         try:
             min_longitude, max_longitude = args.longitude.split(",")
             longitude_range = (min_longitude, max_longitude)
