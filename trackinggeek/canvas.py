@@ -17,6 +17,7 @@
 import os
 import cairo
 import gpxpy
+import math
 from .point import Point
 
 #MODE = "RGBA"
@@ -56,7 +57,8 @@ class Canvas(object):
             self.pixel_height = pixel_dimensions["height"]
             return
         self.aspect_ratio = (self.max_longitude - self.min_longitude) / \
-                            (self.max_latitude - self.min_latitude)
+                            (self._merc_lat(self.max_latitude) -
+                                    self._merc_lat(self.min_latitude))
         if "width" in pixel_dimensions:
             self.pixel_width = pixel_dimensions["width"]
             self.pixel_height = int(float(self.pixel_width) / self.aspect_ratio)
@@ -86,11 +88,21 @@ class Canvas(object):
         print pixel_dimensions
         raise ValueError("Could not calculate the image resolution")
 
+    def _merc_lat(self, lat):
+        """ Create a mercator projection-adjusted latitude
+        """
+        return 180 / math.pi * math.log(math.tan(math.pi / 4 + lat *
+                                                    (math.pi / 180) / 2))
+
     def _convert_to_fraction(self, point):
         x = (point.long - self.min_longitude) / \
             (self.max_longitude - self.min_longitude)
-        y = 1 - (point.lat - self.min_latitude) / \
-                (self.max_latitude - self.min_latitude)
+        merc_lat = self._merc_lat(point.lat)
+        merc_min = self._merc_lat(self.min_latitude)
+        merc_max = self._merc_lat(self.max_latitude)
+        y = 1 - (merc_lat - merc_min) / \
+                (merc_max - merc_min)
+        #print ("Converted to %s, %s)" % (x, y))
         return (x, y)
 
     def _convert_to_pixels(self, point):
@@ -99,7 +111,6 @@ class Canvas(object):
         y = self.pixel_height - 1 - int((self.pixel_height - 1)*
                         (point.lat - self.min_latitude) /
                         (self.max_latitude - self.min_latitude))
-        #print ("Converted to %s, %s" % (x, y))
         return (x, y)
 
     def _draw_point(self, point, radius=1):
