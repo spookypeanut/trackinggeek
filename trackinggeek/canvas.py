@@ -105,27 +105,6 @@ class Canvas(object):
         #print ("Converted to %s, %s)" % (x, y))
         return (x, y)
 
-    def _convert_to_pixels(self, point):
-        x = int((self.pixel_width - 1) * (point.long - self.min_longitude) /
-                                   (self.max_longitude - self.min_longitude))
-        y = self.pixel_height - 1 - int((self.pixel_height - 1)*
-                        (point.lat - self.min_latitude) /
-                        (self.max_latitude - self.min_latitude))
-        return (x, y)
-
-    def _draw_point(self, point, radius=1):
-        if point.long < self.min_longitude or \
-           point.long > self.max_longitude or \
-           point.lat < self.min_latitude or \
-           point.lat > self.max_latitude:
-                return
-
-        pixel = self._convert_to_pixels(point)
-        #print ("Drawing pixel %s" % (pixel,))
-        try:
-            self.image.putpixel(pixel, DRAW_COLOR)
-        except IndexError:
-            print("Putting %s failed" % (pixel,))
 
     def _draw_track(self, parsed_gpx):
         for track in parsed_gpx.tracks:
