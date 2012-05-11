@@ -95,16 +95,24 @@ class Canvas(object):
                                                     (math.pi / 180) / 2))
 
     def _convert_to_fraction(self, point):
-        x = (point.long - self.min_longitude) / \
+        """ Convert a lat/long point into an (x,y) fraction of the drawing area
+        """
+        # TODO: this could be neater. The addition / subtraction should
+        # be (a) consistently one or the other, and (b) we should adjust
+        # the image width to take it into account.
+        # Add half a pixel width so that we're drawing in the centre of
+        # a pixel, not on the edge
+        x = 0.5 / self.pixel_width + (point.long - self.min_longitude) / \
             (self.max_longitude - self.min_longitude)
         merc_lat = self._merc_lat(point.lat)
         merc_min = self._merc_lat(self.min_latitude)
         merc_max = self._merc_lat(self.max_latitude)
-        y = 1 - (merc_lat - merc_min) / \
+        # Subtract half a pixel width so that we're drawing in the centre of
+        # a pixel, not on the edge
+        y = 1 - (0.5 / self.pixel_height) - (merc_lat - merc_min) / \
                 (merc_max - merc_min)
         #print ("Converted to %s, %s)" % (x, y))
         return (x, y)
-
 
     def _draw_track(self, parsed_gpx):
         for track in parsed_gpx.tracks:
