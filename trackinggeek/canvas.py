@@ -166,7 +166,7 @@ class Canvas(object):
     def add_directory(self, directory):
         for dir_path, _, filenames in os.walk(directory):
             gpxfiles = [filename for filename in filenames if
-                    os.path.splitext(filename)[1] == ".gpx"]
+                    os.path.splitext(filename)[-1] == ".gpx"]
             print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
                 len(filenames), dir_path))
             counter = 1
