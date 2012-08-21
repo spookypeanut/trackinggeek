@@ -27,6 +27,8 @@ def main():
                         help='path to the output svg')
     parser.add_argument('--outpng', action='store',
                         help='path to the output png')
+    parser.add_argument('--outma', action='store',
+                        help='path to the output Maya ascii file')
     parser.add_argument('--resolution', action='store',
                         help='absolute resolution of the output image')
     parser.add_argument('--max', action='store',
@@ -83,6 +85,11 @@ def main():
                longitude_range=longitude_range)
     if args.inputdir:
         c.add_directory(args.inputdir)
+    if args.outma:
+        c.save_ma(args.outma)
+    if not args.outpng and not args.outsvg:
+        return 0
+
     c.draw()
     if args.outpng:
         c.save_png(args.outpng)
