@@ -15,12 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import sys
 import argparse
 from trackinggeek.canvas import Canvas
+from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config', action='store',
+                        help='path to the config file to use for defaults')
     parser.add_argument('--inputdir', action='store',
                         help='path to the directory of gpx files')
     parser.add_argument('--outsvg', action='store',
@@ -44,33 +48,41 @@ def main():
     args = parser.parse_args()
     
     pixel_dimensions = {}
-    if "latitude" in args and args.latitude is not None:
+    config = ConfigParser()
+    if args.config is not None:
+        if not os.path.exists(args.config):
+            raise IOError("Config file doesn't exist (%s)" % args.config)
+        config.read(args.config)
+
+    try:
+        latitude = args.latitude or config.get("map", "latitude")
         try:
-            min_latitude, max_latitude = args.latitude.split(",")
+            min_latitude, max_latitude = latitude.split(",")
             latitude_range = (min_latitude, max_latitude)
         except ValueError:
             print("Latitude format invalid")
             parser.print_help()
             return 1
-    else:
+    except (NoSectionError, NoOptionError):
         latitude_range = None
 
-    if "longitude" in args and args.longitude is not None:
+    try:
+        longitude = args.longitude or config.get("map", "longitude")
         try:
-            min_longitude, max_longitude = args.longitude.split(",")
+            min_longitude, max_longitude = longitude.split(",")
             longitude_range = (min_longitude, max_longitude)
         except ValueError:
             print("Longitude format invalid")
             parser.print_help()
             return 1
-    else:
+    except (NoSectionError, NoOptionError):
         longitude_range = None
 
-    if "min" in args and args.min:
+    if args.min:
         pixel_dimensions["min"] = int(args.min)
-    if "max" in args and args.max:
+    if args.max:
         pixel_dimensions["max"] = int(args.max)
-    if "resolution" in args and args.resolution:
+    if args.resolution:
         if not "x" in args.resolution:
             x = y = args.resolution
         else:
