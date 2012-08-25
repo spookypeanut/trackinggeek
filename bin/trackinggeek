@@ -21,6 +21,27 @@ import argparse
 from trackinggeek.canvas import Canvas
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
+class CommandLineError(ValueError):
+    pass
+
+class ConfigFileError(ValueError):
+    pass
+
+def get_value_pair(primary, secondary):
+    try:
+        value_pair = primary or secondary
+        try:
+            min_value, max_value = value_pair.split(",")
+            value_range = (min_value, max_value)
+        except ValueError:
+            msg = "Invalid format: %s" % value_pair
+            if primary:
+                raise CommandLineError(msg)
+            raise ConfigFileError(msg)
+    except (NoSectionError, NoOptionError):
+        value_range = None
+    return value_range
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', action='store',
@@ -54,29 +75,10 @@ def main():
             raise IOError("Config file doesn't exist (%s)" % args.config)
         config.read(args.config)
 
-    try:
-        latitude = args.latitude or config.get("map", "latitude")
-        try:
-            min_latitude, max_latitude = latitude.split(",")
-            latitude_range = (min_latitude, max_latitude)
-        except ValueError:
-            print("Latitude format invalid")
-            parser.print_help()
-            return 1
-    except (NoSectionError, NoOptionError):
-        latitude_range = None
-
-    try:
-        longitude = args.longitude or config.get("map", "longitude")
-        try:
-            min_longitude, max_longitude = longitude.split(",")
-            longitude_range = (min_longitude, max_longitude)
-        except ValueError:
-            print("Longitude format invalid")
-            parser.print_help()
-            return 1
-    except (NoSectionError, NoOptionError):
-        longitude_range = None
+    latitude_range = get_value_pair(args.latitude, 
+                                    config.get("map", "latitude"))
+    longitude_range = get_value_pair(args.longitude, 
+                                     config.get("map", "longitude"))
 
     if args.min:
         pixel_dimensions["min"] = int(args.min)
