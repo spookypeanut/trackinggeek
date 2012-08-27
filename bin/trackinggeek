@@ -15,32 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import sys
 import argparse
 from trackinggeek.canvas import Canvas
-from ConfigParser import ConfigParser, NoSectionError, NoOptionError
-
-class CommandLineError(ValueError):
-    pass
-
-class ConfigFileError(ValueError):
-    pass
-
-def get_value_pair(primary, secondary):
-    try:
-        value_pair = primary or secondary
-        try:
-            min_value, max_value = value_pair.split(",")
-            value_range = (min_value, max_value)
-        except ValueError:
-            msg = "Invalid format: %s" % value_pair
-            if primary:
-                raise CommandLineError(msg)
-            raise ConfigFileError(msg)
-    except (NoSectionError, NoOptionError):
-        value_range = None
-    return value_range
+from trackinggeek.config import Config
 
 def main():
     parser = argparse.ArgumentParser()
@@ -69,30 +47,21 @@ def main():
     args = parser.parse_args()
     
     pixel_dimensions = {}
-    config = ConfigParser()
-    if args.config is not None:
-        if not os.path.exists(args.config):
-            raise IOError("Config file doesn't exist (%s)" % args.config)
-        config.read(args.config)
+    config = Config(args.config)
 
-    latitude_range = get_value_pair(args.latitude, 
-                                    config.get("map", "latitude"))
-    longitude_range = get_value_pair(args.longitude, 
-                                     config.get("map", "longitude"))
+    latitude_range = config.get_latitude(args.latitude)
+    longitude_range = config.get_longitude(args.longitude)
 
     if args.min:
         pixel_dimensions["min"] = int(args.min)
     if args.max:
         pixel_dimensions["max"] = int(args.max)
-    if args.resolution:
-        if not "x" in args.resolution:
-            x = y = args.resolution
-        else:
-            (x, y) = args.resolution.split("x")
-        if x:
-            pixel_dimensions["width"] = int(x)
-        if y:
-            pixel_dimensions["height"] = int(y)
+
+    x, y = config.get_resolution(args.resolution)
+
+    if x and y:
+        pixel_dimensions["width"] = int(x)
+        pixel_dimensions["height"] = int(y)
 
     c = Canvas(pixel_dimensions=pixel_dimensions,
                latitude_range=latitude_range,
