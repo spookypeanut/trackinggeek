@@ -52,10 +52,10 @@ def main():
     latitude_range = config.get_latitude(args.latitude)
     longitude_range = config.get_longitude(args.longitude)
 
-    if args.min:
-        pixel_dimensions["min"] = int(args.min)
-    if args.max:
-        pixel_dimensions["max"] = int(args.max)
+    # TODO: Even if resolution is specified in the config, a
+    # command-line min / max should override it 
+    pixel_dimensions["min"] = config.get_min_resolution(args.min)
+    pixel_dimensions["max"] = config.get_max_resolution(args.max)
 
     x, y = config.get_resolution(args.resolution)
 
