@@ -22,13 +22,12 @@ from .point import Point
 
 #MODE = "RGBA"
 MODE = "L"
-#DRAW_COLOR = (0, 0, 255, 255) 
-DRAW_COLOR = 255
+DEFAULT_COLOUR = (0.3, 0.2, 0.5)
 DEFAULT_SIZE = 1024
 
 class Canvas(object):
     def __init__(self, latitude_range=None, longitude_range=None,
-                 pixel_dimensions=None):
+                 pixel_dimensions=None, config=None):
         # TODO: Have ability to override the automatic lat/long range
         if latitude_range:
             self.min_latitude = float(latitude_range[0])
@@ -44,6 +43,7 @@ class Canvas(object):
             self.min_longitude = None
             self.max_longitude = None
 
+        self.config = config
         self.pixel_dimensions = pixel_dimensions
         self.tracks = []
 
@@ -115,6 +115,7 @@ class Canvas(object):
         return (x, y)
 
     def _draw_track(self, parsed_gpx):
+        base_colour = self.config.get_basecolour() or DEFAULT_COLOUR
         for track in parsed_gpx.tracks:
             for segment in track.segments:
                 point_generator = (p for p in segment.points)
@@ -128,7 +129,7 @@ class Canvas(object):
                                        eachpoint.longitude)
                     self.ctx.line_to(*self._convert_to_fraction(next_point))
 
-                self.ctx.set_source_rgb(0.3, 0.2, 0.5) # Solid color
+                self.ctx.set_source_rgb(*base_colour) # Solid color
                 self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
                 self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
                 self.ctx.set_line_width(1.0 / self.pixel_width)

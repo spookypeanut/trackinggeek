@@ -4,11 +4,11 @@ from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 class ConfigError(ValueError):
     pass
 
-def get_value_pair(stringpair):
+def get_multivalue(stringpair):
     try:
         # Get a pair in either 10x20 or 10,20 formats
-        min_value, max_value = stringpair.replace("x", ",").split(",")
-        return (min_value, max_value)
+        value_tuple = tuple(stringpair.replace("x", ",").split(","))
+        return value_tuple
     except ValueError:
         msg = "Invalid format: %s" % stringpair
         raise ConfigError(msg)
@@ -32,21 +32,25 @@ class Config(ConfigParser):
             # should have sensible defaults
             return None
 
-    def _generic_dual_getter(self, section, entry, override):
+    def _generic_multi_getter(self, section, entry, override):
         try:
             if override:
-                return get_value_pair(override)
-            return get_value_pair(self.get(section, entry))
+                return get_multivalue(override)
+            return get_multivalue(self.get(section, entry))
         except (NoSectionError, NoOptionError):
             # If it's not in the config file or command line, our code
             # should have sensible defaults
             return (None, None)
 
     def get_latitude(self, override=None):
-        return self._generic_dual_getter("map", "latitude", override)
+        return self._generic_multi_getter("map", "latitude", override)
 
     def get_longitude(self, override=None):
-        return self._generic_dual_getter("map", "longitude", override)
+        return self._generic_multi_getter("map", "longitude", override)
+
+    def get_basecolour(self, override=None):
+        return tuple([float(value) for value in 
+                self._generic_multi_getter("tracks", "basecolour", override)])
 
     def get_min_resolution(self, override=None):
         value = self._generic_single_getter("output", "minresolution",
@@ -63,4 +67,4 @@ class Config(ConfigParser):
         return value
 
     def get_resolution(self, override=None):
-        return self._generic_dual_getter("output", "resolution", override)
+        return self._generic_multi_getter("output", "resolution", override)

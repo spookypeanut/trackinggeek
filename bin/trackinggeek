@@ -65,7 +65,8 @@ def main():
 
     c = Canvas(pixel_dimensions=pixel_dimensions,
                latitude_range=latitude_range,
-               longitude_range=longitude_range)
+               longitude_range=longitude_range,
+               config=config)
     if args.inputdir:
         c.add_directory(args.inputdir)
     if args.outma:
