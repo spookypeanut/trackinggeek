@@ -74,6 +74,14 @@ class Config(ConfigParser):
         value = self._generic_single_getter("drawing", "linewidth", override)
         return float(value)
 
+    def get_linewidth_min(self, override=None):
+        value = self._generic_single_getter("drawing", "linewidth_min", override)
+        return float(value)
+
+    def get_linewidth_max(self, override=None):
+        value = self._generic_single_getter("drawing", "linewidth_max", override)
+        return float(value)
+
     def get_min_resolution(self, override=None):
         value = self._generic_single_getter("output", "minresolution",
                                             override)
