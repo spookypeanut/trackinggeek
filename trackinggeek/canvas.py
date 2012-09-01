@@ -114,6 +114,18 @@ class Canvas(object):
         #print ("Converted to %s, %s)" % (x, y))
         return (x, y)
 
+    def _colour_is_constant(self):
+        pass
+
+    def _width_is_constant(self):
+        pass
+        
+    def _get_colour(self, speed, elevation):
+        pass
+
+    def _get_line_width(self, speed, elevation):
+        pass
+
     def _draw_track(self, parsed_gpx):
         base_colour = self.config.get_basecolour() or DEFAULT_COLOUR
         for track in parsed_gpx.tracks:
