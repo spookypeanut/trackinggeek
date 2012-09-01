@@ -50,7 +50,7 @@ class Config(ConfigParser):
 
     def get_basecolour(self, override=None):
         return tuple([float(value) for value in 
-                self._generic_multi_getter("tracks", "basecolour", override)])
+                self._generic_multi_getter("drawing", "basecolour", override)])
 
     def get_min_resolution(self, override=None):
         value = self._generic_single_getter("output", "minresolution",
