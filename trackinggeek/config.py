@@ -52,6 +52,28 @@ class Config(ConfigParser):
         return tuple([float(value) for value in 
                 self._generic_multi_getter("drawing", "basecolour", override)])
 
+    def get_linewidth_type(self, override=None):
+        """ Get the type of variation in the linewidth
+        """
+        value = self._generic_single_getter("drawing", "linewidth", override)
+        if value in ("elevation", "speed"):
+            return value
+        try:
+            float(value)
+        except ValueError:
+            msg = "Invalid entry for linewidth in config: %s" % value
+            raise ConfigError(msg)
+        else:
+            return "constant"
+
+    def get_linewidth(self, override=None):
+        if self.get_linewidth_type() != "constant":
+            msg = "Linewidth is not constant: "
+            msg += "use get_linewidth_type/min/max"
+            raise ConfigError(msg)
+        value = self._generic_single_getter("drawing", "linewidth", override)
+        return float(value)
+
     def get_min_resolution(self, override=None):
         value = self._generic_single_getter("output", "minresolution",
                                             override)
