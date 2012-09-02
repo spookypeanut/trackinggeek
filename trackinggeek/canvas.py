@@ -156,11 +156,9 @@ class Canvas(object):
             for segment in track.segments:
                 point_generator = (p for p in segment.points)
                 first = point_generator.next()
-                print("Starting at %s" % first)
                 pixels = self._convert_to_fraction(Point(first.latitude,
                     first.longitude))
                 self.ctx.move_to(*pixels)
-                start_pixels = pixels
                 previous_point = first
 
                 for eachpoint in point_generator:
@@ -229,6 +227,7 @@ class Canvas(object):
             self.auto_max_elevation = elev_extremes.maximum
 
     def add_directory(self, directory):
+        print("Getting tracks from %s" % directory)
         for dir_path, _, filenames in os.walk(directory):
             gpxfiles = [filename for filename in filenames if
                     os.path.splitext(filename)[-1] == ".gpx"]
@@ -251,8 +250,10 @@ class Canvas(object):
             self.max_longitude = self.auto_max_longitude
         if not self.min_elevation:
             self.min_elevation = self.auto_min_elevation
+            print("Detected minimum elevation is %s" % self.min_elevation)
         if not self.max_elevation:
             self.max_elevation = self.auto_max_elevation
+            print("Detected maximum elevation is %s" % self.max_elevation)
         self._calc_pixel_dimensions(self.pixel_dimensions)
         self.surface = cairo.SVGSurface("/tmp/test.svg",
                                         float(self.pixel_width),
