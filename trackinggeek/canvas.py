@@ -48,8 +48,8 @@ class Canvas(object):
         self.tracks = []
 
         # TODO: work this out in add_track
-        self.min_elevation = 60
-        self.max_elevation = 100
+        self.min_elevation = None
+        self.max_elevation = None
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
         print ("Canvas._calc_pixel_dimensions(%s)" % (pixel_dimensions,))
@@ -201,10 +201,14 @@ class Canvas(object):
             return
         self.tracks.append(parsed)
         bounds = parsed.get_bounds()
+        elev_extremes = parsed.get_elevation_extremes()
+
         if len(self.tracks) == 1:
             print ("Setting ranges:")
             self.auto_min_latitude = bounds.min_latitude
             self.auto_max_latitude = bounds.max_latitude
+            self.auto_min_elevation = elev_extremes.minimum
+            self.auto_max_elevation = elev_extremes.maximum
             print("latitude = %s - %s" % (self.auto_min_latitude,
                                           self.auto_max_latitude))
             self.auto_min_longitude = bounds.min_longitude
@@ -220,6 +224,11 @@ class Canvas(object):
             self.auto_min_longitude = bounds.min_longitude
         if self.auto_max_longitude < bounds.max_longitude:
             self.auto_max_longitude = bounds.max_longitude
+
+        if self.auto_min_elevation > elev_extremes.minimum:
+            self.auto_min_elevation = elev_extremes.minimum
+        if self.auto_max_elevation < elev_extremes.maximum:
+            self.auto_max_elevation = elev_extremes.maximum
 
     def add_directory(self, directory):
         for dir_path, _, filenames in os.walk(directory):
@@ -242,6 +251,10 @@ class Canvas(object):
             self.min_longitude = self.auto_min_longitude
         if not self.max_longitude:
             self.max_longitude = self.auto_max_longitude
+        if not self.min_elevation:
+            self.min_elevation = self.auto_min_elevation
+        if not self.max_elevation:
+            self.max_elevation = self.auto_max_elevation
         self._calc_pixel_dimensions(self.pixel_dimensions)
         self.surface = cairo.SVGSurface("/tmp/test.svg",
                                         float(self.pixel_width),
