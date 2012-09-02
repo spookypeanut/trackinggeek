@@ -143,9 +143,7 @@ class Canvas(object):
                 return lw_min
             fraction = 1.0 * (elevation - self.min_elevation) / \
                              (self.max_elevation - self.min_elevation)
-            print("fraction is %s" % fraction)
             width = lw_min + fraction * (lw_max - lw_min)
-            print("width is %s" % width)
             return(width)
 
         raise NotImplementedError
