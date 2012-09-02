@@ -47,6 +47,10 @@ class Canvas(object):
         self.pixel_dimensions = pixel_dimensions
         self.tracks = []
 
+        # TODO: work this out in add_track
+        self.min_elevation = 60
+        self.max_elevation = 100
+
     def _calc_pixel_dimensions(self, pixel_dimensions):
         print ("Canvas._calc_pixel_dimensions(%s)" % (pixel_dimensions,))
         if pixel_dimensions is None or len(pixel_dimensions.keys()) == 0:
@@ -117,17 +121,39 @@ class Canvas(object):
     def _colour_is_constant(self):
         pass
 
-    def _width_is_constant(self):
-        pass
+    def _linewidth_is_constant(self):
+        if self.config.get_linewidth_type() == "constant":
+            return True
+        return False
         
     def _get_colour(self, speed, elevation):
-        pass
+        return DEFAULT_COLOUR
 
-    def _get_line_width(self, speed, elevation):
-        pass
+            
+    def _get_linewidth(self, speed, elevation):
+        lw_type = self.config.get_linewidth_type() 
+        if lw_type == "constant":
+            return(self.config.get_linewidth())
+        if lw_type == "elevation":
+            lw_min = self.config.get_linewidth_min()
+            lw_max = self.config.get_linewidth_max()
+            if elevation > self.max_elevation:
+                return lw_max
+            if elevation < self.min_elevation:
+                return lw_min
+            fraction = 1.0 * (elevation - self.min_elevation) / \
+                             (self.max_elevation - self.min_elevation)
+            print("fraction is %s" % fraction)
+            width = lw_min + fraction * (lw_max - lw_min)
+            print("width is %s" % width)
+            return(width)
+
+        raise NotImplementedError
 
     def _draw_track(self, parsed_gpx):
         base_colour = self.config.get_basecolour() or DEFAULT_COLOUR
+        variabletrack = not self._colour_is_constant() or \
+                        not self._linewidth_is_constant()
         for track in parsed_gpx.tracks:
             for segment in track.segments:
                 point_generator = (p for p in segment.points)
@@ -136,16 +162,35 @@ class Canvas(object):
                 pixels = self._convert_to_fraction(Point(first.latitude,
                     first.longitude))
                 self.ctx.move_to(*pixels)
+                start_pixels = pixels
+                previous_point = first
+
                 for eachpoint in point_generator:
                     next_point = Point(eachpoint.latitude,
                                        eachpoint.longitude)
-                    self.ctx.line_to(*self._convert_to_fraction(next_point))
+                    pixels = self._convert_to_fraction(next_point)
+                    self.ctx.line_to(*pixels)
+                    if not variabletrack:
+                        continue
+                    speed = eachpoint.speed(previous_point)
+                    elevation = eachpoint.elevation
+                    current_colour = self._get_colour(speed, elevation)
+                    current_width = self._get_linewidth(speed, elevation)
+                    self.ctx.set_source_rgb(*current_colour) # Solid color
+                    self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+                    self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+                    self.ctx.set_line_width(current_width / self.pixel_width)
+                    self.ctx.stroke()
+                    # Start next line
+                    self.ctx.move_to(*pixels)
+                    previous_point = eachpoint
 
-                self.ctx.set_source_rgb(*base_colour) # Solid color
-                self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-                self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-                self.ctx.set_line_width(1.0 / self.pixel_width)
-                self.ctx.stroke()
+                if not variabletrack:
+                    self.ctx.set_source_rgb(*base_colour) # Solid color
+                    self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+                    self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+                    self.ctx.set_line_width(1.0 / self.pixel_width)
+                    self.ctx.stroke()
     
     def add_track(self, path):
         gpx_file = open(path, "r")
