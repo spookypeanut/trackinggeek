@@ -63,6 +63,9 @@ def main():
         pixel_dimensions["width"] = int(x)
         pixel_dimensions["height"] = int(y)
 
+    outpng = config.get_outpng(args.outpng)
+    outsvg = config.get_outpng(args.outsvg)
+
     c = Canvas(pixel_dimensions=pixel_dimensions,
                latitude_range=latitude_range,
                longitude_range=longitude_range,
@@ -71,14 +74,14 @@ def main():
         c.add_directory(args.inputdir)
     if args.outma:
         c.save_ma(args.outma)
-    if not args.outpng and not args.outsvg:
+    if not outpng and not outsvg:
         return 0
 
     c.draw()
-    if args.outpng:
-        c.save_png(args.outpng)
-    if args.outsvg:
-        c.save_svg(args.outsvg)
+    if outpng:
+        c.save_png(outpng)
+    if outsvg:
+        c.save_svg(outsvg)
 
 if __name__ == "__main__":
     sys.exit(main())

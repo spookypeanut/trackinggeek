@@ -89,6 +89,14 @@ class Config(ConfigParser):
             return int(value)
         return value
 
+    def get_outsvg(self, override=None):
+        return(self._generic_single_getter("output", "svgpath",
+            override))
+
+    def get_outpng(self, override=None):
+        return(self._generic_single_getter("output", "pngpath",
+            override))
+
     def get_max_resolution(self, override=None):
         value = self._generic_single_getter("output", "maxresolution",
                                             override)
