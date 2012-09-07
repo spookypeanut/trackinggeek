@@ -47,7 +47,6 @@ class Canvas(object):
         self.pixel_dimensions = pixel_dimensions
         self.tracks = []
 
-        # TODO: work this out in add_track
         self.min_elevation = None
         self.max_elevation = None
 
@@ -193,14 +192,21 @@ class Canvas(object):
         try:
             parsed = gpxpy.parse(gpx_file)
         except Exception:
-            print("The file %s did not parse correctly, skipping" % path)
+            print("File did not parse correctly, skipping")
             return
-        self.tracks.append(parsed)
         bounds = parsed.get_bounds()
+        if self.max_latitude:
+            if bounds.min_latitude > self.max_latitude or \
+                    bounds.max_latitude < self.min_latitude or \
+                    bounds.min_longitude > self.max_longitude or \
+                    bounds.max_longitude < self.min_longitude:
+                print("Outside our specified area")
+                return
+        self.tracks.append(parsed)
         elev_extremes = parsed.get_elevation_extremes()
 
         if len(self.tracks) == 1:
-            print ("Setting ranges:")
+            print ("Setting initial ranges:")
             self.auto_min_latitude = bounds.min_latitude
             self.auto_max_latitude = bounds.max_latitude
             self.auto_min_elevation = elev_extremes.minimum
@@ -261,6 +267,7 @@ class Canvas(object):
         self.ctx = cairo.Context(self.surface)
         self.ctx.scale (float(self.pixel_width), float(self.pixel_height))
 
+        print("Drawing %s tracks" % len(self.tracks))
         for track in self.tracks:
             self._draw_track(track)
 
