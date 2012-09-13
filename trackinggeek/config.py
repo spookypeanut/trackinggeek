@@ -56,7 +56,6 @@ class Config(ConfigParser):
     def get_palette_by_name(self, name):
         try:
             pal_string = self.get("palettes", name)
-            print pal_string
             return literal_eval(pal_string)
         except (NoSectionError, NoOptionError):
             msg = "Palette %s doesn't exist" % name
