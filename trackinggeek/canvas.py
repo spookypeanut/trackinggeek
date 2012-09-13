@@ -218,19 +218,22 @@ class Canvas(object):
             print("longitude = %s - %s" % (self.auto_min_longitude,
                                            self.auto_max_longitude))
             return
-        if self.auto_min_latitude > bounds.min_latitude:
-            self.auto_min_latitude = bounds.min_latitude
-        if self.auto_max_latitude < bounds.max_latitude:
-            self.auto_max_latitude = bounds.max_latitude
-        if self.auto_min_longitude > bounds.min_longitude:
-            self.auto_min_longitude = bounds.min_longitude
-        if self.auto_max_longitude < bounds.max_longitude:
-            self.auto_max_longitude = bounds.max_longitude
 
-        if self.auto_min_elevation > elev_extremes.minimum:
-            self.auto_min_elevation = elev_extremes.minimum
-        if self.auto_max_elevation < elev_extremes.maximum:
-            self.auto_max_elevation = elev_extremes.maximum
+        if not self.min_latitude:
+            if self.auto_min_latitude > bounds.min_latitude:
+                self.auto_min_latitude = bounds.min_latitude
+            if self.auto_max_latitude < bounds.max_latitude:
+                self.auto_max_latitude = bounds.max_latitude
+            if self.auto_min_longitude > bounds.min_longitude:
+                self.auto_min_longitude = bounds.min_longitude
+            if self.auto_max_longitude < bounds.max_longitude:
+                self.auto_max_longitude = bounds.max_longitude
+
+        if not self.min_elevation:
+            if self.auto_min_elevation > elev_extremes.minimum:
+                self.auto_min_elevation = elev_extremes.minimum
+            if self.auto_max_elevation < elev_extremes.maximum:
+                self.auto_max_elevation = elev_extremes.maximum
 
     def add_directory(self, directory):
         print("Getting tracks from %s" % directory)
