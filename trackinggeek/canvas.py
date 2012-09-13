@@ -19,6 +19,7 @@ import cairo
 import gpxpy
 import math
 from .point import Point
+from .config import ConfigError
 
 #MODE = "RGBA"
 MODE = "L"
@@ -118,7 +119,9 @@ class Canvas(object):
         return (x, y)
 
     def _colour_is_constant(self):
-        pass
+        if self.config.get_colour_type() == "constant":
+            return True
+        return False
 
     def _linewidth_is_constant(self):
         if self.config.get_linewidth_type() == "constant":
@@ -126,8 +129,24 @@ class Canvas(object):
         return False
         
     def _get_colour(self, speed, elevation):
-        return DEFAULT_COLOUR
+        lw_type = self.config.get_colour_type() 
+        if lw_type == "constant":
+            return(self.config.get_colour())
+        if lw_type == "elevation":
+            try:
+                palette = self.config.get_palette()
+            except ConfigError:
+                print("Warning: no palette in config")
+                palette = {0.0:(0,0,0), 1.0:(1,1,1)}
+            if elevation > self.max_elevation:
+                return _interpolate_palette(1.0, palette)
+            if elevation < self.min_elevation:
+                return _interpolate_palette(0.0, palette)
+            fraction = (elevation - self.min_elevation) / \
+                       (self.max_elevation - self.min_elevation)
+            return _interpolate_palette(fraction, palette)
 
+        raise NotImplementedError
             
     def _get_linewidth(self, speed, elevation):
         lw_type = self.config.get_linewidth_type() 
@@ -280,3 +299,27 @@ class Canvas(object):
     def save_svg(self, path):
         self.surface.finish()
         raise NotImplementedError
+
+def _interpolate_palette(fraction, palette):
+    value_list = sorted(palette.keys())
+    if fraction in value_list:
+        return palette[fraction]
+    previous_value = value_list[0]
+    for value in value_list:
+        if fraction > value:
+            previous_value = value
+            continue
+        colour_fraction = (fraction - previous_value) / \
+                          (value - previous_value)
+        return _interpolate_colours(colour_fraction, palette[previous_value],
+                                    palette[value])
+
+
+def _interpolate_colours(fraction, start, end):
+    output = []
+    for i in range(3):
+        diff = end[i] - start[i]
+        output.append(start[i] + diff * fraction)
+    return tuple(output)
+
+
