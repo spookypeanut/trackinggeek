@@ -254,6 +254,12 @@ class Canvas(object):
             if self.auto_max_elevation < elev_extremes.maximum:
                 self.auto_max_elevation = elev_extremes.maximum
 
+    def add_path(self, path):
+        if os.path.isdir(path):
+            self.add_directory(path)
+        else:
+            self.add_track(path)
+
     def add_directory(self, directory):
         print("Getting tracks from %s" % directory)
         for dir_path, _, filenames in os.walk(directory):

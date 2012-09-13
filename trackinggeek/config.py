@@ -125,8 +125,8 @@ class Config(ConfigParser):
         value = self._generic_single_getter("drawing", "linewidth_max", override)
         return float(value)
 
-    def get_inputdir(self, override=None):
-        return(self._generic_single_getter("input", "gpxdir",
+    def get_inputpath(self, override=None):
+        return(self._generic_single_getter("input", "path",
             override))
 
     def get_outpng(self, override=None):
