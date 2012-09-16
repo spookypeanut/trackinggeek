@@ -62,10 +62,16 @@ class Config(ConfigParser):
             raise ConfigError(msg)
 
     def get_latitude(self, override=None):
-        return self._generic_multi_getter("map", "latitude", override)
+        try:
+            return self._generic_multi_getter("map", "latitude", override)
+        except ConfigError:
+            return None
 
     def get_longitude(self, override=None):
-        return self._generic_multi_getter("map", "longitude", override)
+        try:
+            return self._generic_multi_getter("map", "longitude", override)
+        except ConfigError:
+            return None
 
     def get_basecolour(self, override=None):
         try:
