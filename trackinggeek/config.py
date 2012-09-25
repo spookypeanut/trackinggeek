@@ -5,6 +5,16 @@ from ast import literal_eval
 class ConfigError(ValueError):
     pass
 
+TRUESTRINGS = ["yes", "y", "1", "true", "t"]
+FALSESTRINGS = ["no", "n", "0", "false", "f"]
+
+def stringtobool(value):
+    if value.lower() in TRUESTRINGS:
+        return True
+    if value.lower() in FALSESTRINGS:
+        return False
+    raise ValueError("%s is neither true or false" % value)
+
 def get_multivalue(stringpair):
     try:
         # Get a pair in either 10x20 or 10,20 formats
@@ -151,6 +161,14 @@ class Config(ConfigParser):
             return(self._generic_single_getter("output", "mapath", override))
         except ConfigError:
             return None
+
+    def savememory(self, override=None):
+        try:
+            value = self._generic_single_getter("input", "savememory",
+                                                override)
+        except ConfigError:
+            return None
+        return stringtobool(value)
 
     def get_min_resolution(self, override=None):
         try:

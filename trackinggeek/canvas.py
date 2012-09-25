@@ -46,7 +46,8 @@ class Canvas(object):
 
         self.config = config
         self.pixel_dimensions = pixel_dimensions
-        self.tracks = []
+        self._track_objects = []
+        self._track_paths = []
 
         self.min_elevation = None
         self.max_elevation = None
@@ -127,12 +128,12 @@ class Canvas(object):
         lw_type = self.config.get_colour_type() 
         if lw_type == "constant":
             return(self.config.get_colour())
+        try:
+            palette = self.config.get_palette()
+        except ConfigError:
+            print("Warning: no palette in config")
+            palette = {0.0:(0,0,0), 1.0:(1,1,1)}
         if lw_type == "elevation":
-            try:
-                palette = self.config.get_palette()
-            except ConfigError:
-                print("Warning: no palette in config")
-                palette = {0.0:(0,0,0), 1.0:(1,1,1)}
             if elevation > self.max_elevation:
                 return _interpolate_palette(1.0, palette)
             if elevation < self.min_elevation:
@@ -140,7 +141,6 @@ class Canvas(object):
             fraction = (elevation - self.min_elevation) / \
                        (self.max_elevation - self.min_elevation)
             return _interpolate_palette(fraction, palette)
-
         raise NotImplementedError
             
     def _get_linewidth(self, speed, elevation):
@@ -201,53 +201,70 @@ class Canvas(object):
                     self.ctx.set_line_width(1.0 / self.pixel_width)
                     self.ctx.stroke()
     
+    def get_tracks(self):
+        if self.config.savememory():
+            for path in self._track_paths:
+                with open(path, "r") as gpx_file:
+                    yield gpxpy.parse(gpx_file)
+        else:
+            for track in self._track_objects:
+                yield track
+
+    @property
+    def numtracks(self):
+        if self.config.savememory():
+            return len(self._track_paths)
+        else:
+            return len(self._track_objects)
+
     def add_track(self, path):
-        gpx_file = open(path, "r")
-        try:
-            parsed = gpxpy.parse(gpx_file)
-        except Exception:
-            print("File did not parse correctly, skipping")
-            return
-        bounds = parsed.get_bounds()
-        if self.max_latitude:
-            if bounds.min_latitude > self.max_latitude or \
-                    bounds.max_latitude < self.min_latitude or \
-                    bounds.min_longitude > self.max_longitude or \
-                    bounds.max_longitude < self.min_longitude:
-                print("Outside our specified area")
+        with open(path, "r") as gpx_file:
+            try:
+                parsed = gpxpy.parse(gpx_file)
+            except Exception:
+                print("File did not parse correctly, skipping")
                 return
-        self.tracks.append(parsed)
-        elev_extremes = parsed.get_elevation_extremes()
+            bounds = parsed.get_bounds()
+            if self.max_latitude:
+                if bounds.min_latitude > self.max_latitude or \
+                        bounds.max_latitude < self.min_latitude or \
+                        bounds.min_longitude > self.max_longitude or \
+                        bounds.max_longitude < self.min_longitude:
+                    print("Outside our specified area")
+                    return
+            if self.config.savememory():
+                self._track_paths.append(path)
+            else:
+                self._track_objects.append(parsed)
 
-        if len(self.tracks) == 1:
-            print ("Setting initial ranges:")
-            self.auto_min_latitude = bounds.min_latitude
-            self.auto_max_latitude = bounds.max_latitude
-            self.auto_min_elevation = elev_extremes.minimum
-            self.auto_max_elevation = elev_extremes.maximum
-            print("latitude = %s - %s" % (self.auto_min_latitude,
-                                          self.auto_max_latitude))
-            self.auto_min_longitude = bounds.min_longitude
-            self.auto_max_longitude = bounds.max_longitude
-            print("longitude = %s - %s" % (self.auto_min_longitude,
-                                           self.auto_max_longitude))
-            return
+            elev_extremes = parsed.get_elevation_extremes()
 
-        if not self.min_latitude:
-            if self.auto_min_latitude > bounds.min_latitude:
+            if self.numtracks == 1:
                 self.auto_min_latitude = bounds.min_latitude
-            if self.auto_max_latitude < bounds.max_latitude:
                 self.auto_max_latitude = bounds.max_latitude
-            if self.auto_min_longitude > bounds.min_longitude:
                 self.auto_min_longitude = bounds.min_longitude
-            if self.auto_max_longitude < bounds.max_longitude:
                 self.auto_max_longitude = bounds.max_longitude
-
-        if not self.min_elevation:
-            if self.auto_min_elevation > elev_extremes.minimum:
                 self.auto_min_elevation = elev_extremes.minimum
-            if self.auto_max_elevation < elev_extremes.maximum:
                 self.auto_max_elevation = elev_extremes.maximum
+                self.auto_min_elevation = elev_extremes.minimum
+                self.auto_max_elevation = elev_extremes.maximum
+                return
+
+            if not self.min_latitude:
+                if self.auto_min_latitude > bounds.min_latitude:
+                    self.auto_min_latitude = bounds.min_latitude
+                if self.auto_max_latitude < bounds.max_latitude:
+                    self.auto_max_latitude = bounds.max_latitude
+                if self.auto_min_longitude > bounds.min_longitude:
+                    self.auto_min_longitude = bounds.min_longitude
+                if self.auto_max_longitude < bounds.max_longitude:
+                    self.auto_max_longitude = bounds.max_longitude
+
+            if not self.min_elevation:
+                if self.auto_min_elevation > elev_extremes.minimum:
+                    self.auto_min_elevation = elev_extremes.minimum
+                if self.auto_max_elevation < elev_extremes.maximum:
+                    self.auto_max_elevation = elev_extremes.maximum
 
     def add_path(self, path):
         if os.path.isdir(path):
@@ -268,6 +285,27 @@ class Canvas(object):
                 self.add_track(os.path.join(dir_path, i))
                 counter += 1
 
+    def _detect_elevations(self):
+        if self._colour_is_constant() and \
+                self._linewidth_is_constant():
+            print("Elevation detection not required")
+            return
+        currmin = None
+        currmax = None
+        print("Detecting min & max elevation (%s tracks)" % self.numtracks)
+        for track in self.get_tracks():
+            if not currmin:
+                elev_extremes = track.get_elevation_extremes()
+                currmin = elev_extremes.minimum
+                currmax = elev_extremes.maximum
+                continue
+            currmin = min(currmin, elev_extremes.minimum)
+            currmax = max(currmax, elev_extremes.maximum)
+        self.min_elevation = currmin
+        self.max_elevation = currmax
+        print("Detected minimum elevation is %s" % self.min_elevation)
+        print("Detected maximum elevation is %s" % self.max_elevation)
+
     def draw(self):
         if not self.min_latitude:
             self.min_latitude = self.auto_min_latitude
@@ -278,11 +316,7 @@ class Canvas(object):
         if not self.max_longitude:
             self.max_longitude = self.auto_max_longitude
         if not self.min_elevation:
-            self.min_elevation = self.auto_min_elevation
-            print("Detected minimum elevation is %s" % self.min_elevation)
-        if not self.max_elevation:
-            self.max_elevation = self.auto_max_elevation
-            print("Detected maximum elevation is %s" % self.max_elevation)
+            self._detect_elevations()
         self._calc_pixel_dimensions(self.pixel_dimensions)
         self.surface = cairo.SVGSurface("/tmp/test.svg",
                                         float(self.pixel_width),
@@ -290,8 +324,13 @@ class Canvas(object):
         self.ctx = cairo.Context(self.surface)
         self.ctx.scale (float(self.pixel_width), float(self.pixel_height))
 
-        print("Drawing %s tracks" % len(self.tracks))
-        for track in self.tracks:
+        print("Drawing %s tracks" % self.numtracks)
+        counter = 0
+        total = self.numtracks
+        for track in self.get_tracks():
+            counter += 1
+            if counter % 10 == 0:
+                print("Drawn %s of %s" % (counter, total))
             self._draw_track(track)
 
     def save_png(self, path):
@@ -322,5 +361,3 @@ def _interpolate_colours(fraction, start, end):
         diff = end[i] - start[i]
         output.append(start[i] + diff * fraction)
     return tuple(output)
-
-
