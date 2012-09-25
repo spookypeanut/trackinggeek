@@ -52,10 +52,8 @@ class Canvas(object):
         self.max_elevation = None
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
-        print ("Canvas._calc_pixel_dimensions(%s)" % (pixel_dimensions,))
         if pixel_dimensions is None or len(pixel_dimensions.keys()) == 0:
             pixel_dimensions = {"max":DEFAULT_SIZE}
-        print pixel_dimensions
         if "width" in pixel_dimensions and "height" in pixel_dimensions:
             self.pixel_width = pixel_dimensions["width"]
             self.pixel_height = pixel_dimensions["height"]
@@ -77,8 +75,6 @@ class Canvas(object):
                 self.pixel_height = int(float(self.pixel_width) / self.aspect_ratio)
                 return
             self.pixel_height = pixel_dimensions["max"]
-            print(self.pixel_height)
-            print(self.pixel_height)
             self.pixel_width = int(float(self.pixel_height) * self.aspect_ratio)
             return
         if "min" in pixel_dimensions:
@@ -89,7 +85,6 @@ class Canvas(object):
             self.pixel_height = pixel_dimensions["min"]
             self.pixel_width = int(float(self.pixel_height) * self.aspect_ratio)
             return
-        print pixel_dimensions
         raise ValueError("Could not calculate the image resolution")
 
     def _merc_lat(self, lat):
