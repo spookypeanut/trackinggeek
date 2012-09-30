@@ -106,6 +106,13 @@ class Config(ConfigParser):
         else:
             return "constant"
 
+    def get_background(self, override=None):
+        try:
+            return tuple([float(value) for value in 
+                self._generic_multi_getter("drawing", "background", override)])
+        except ConfigError:
+            return None
+
     def get_colour(self, override=None):
         return tuple([float(value) for value in 
                 self._generic_multi_getter("drawing", "colour", override)])

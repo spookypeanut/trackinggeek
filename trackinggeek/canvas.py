@@ -324,6 +324,14 @@ class Canvas(object):
         self.ctx = cairo.Context(self.surface)
         self.ctx.scale (float(self.pixel_width), float(self.pixel_height))
 
+        bkg = self.config.get_background()
+        if bkg:
+            if len(bkg) == 3:
+                self.ctx.set_source_rgb(*bkg)
+            elif len(bkg) == 4:
+                self.ctx.set_source_rgba(*bkg)
+            self.ctx.paint()
+
         print("Drawing %s tracks" % self.numtracks)
         counter = 0
         total = self.numtracks
