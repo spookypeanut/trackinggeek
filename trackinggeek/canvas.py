@@ -46,6 +46,7 @@ class Canvas(object):
 
         self.config = config
         self.pixel_dimensions = pixel_dimensions
+        self._all_tracks = []
         self._track_objects = []
         self._track_paths = []
 
@@ -53,6 +54,9 @@ class Canvas(object):
         self.max_elevation = None
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
+        """ Calculate the size of the image in pixels, given whatever
+        minimum / maximums we've been given.
+        """
         if pixel_dimensions is None or len(pixel_dimensions.keys()) == 0:
             pixel_dimensions = {"max":DEFAULT_SIZE}
         if "width" in pixel_dimensions and "height" in pixel_dimensions:
@@ -279,11 +283,15 @@ class Canvas(object):
                     os.path.splitext(filename)[-1] == ".gpx"]
             print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
                 len(filenames), dir_path))
-            counter = 1
             for i in gpxfiles:
-                print("Adding file %4d/%4d: %s" % (counter, len(gpxfiles), i))
-                self.add_track(os.path.join(dir_path, i))
-                counter += 1
+                self._all_tracks.append(os.path.join(dir_path, i))
+        counter = 1
+        for i in self._all_tracks:
+            print("Adding file %4d/%4d: %s" % (counter,
+                                               len(self._all_tracks), i))
+            self.add_track(i)
+            counter += 1
+
 
     def _detect_elevations(self):
         if self._colour_is_constant() and \
