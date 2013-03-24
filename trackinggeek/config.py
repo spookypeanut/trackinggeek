@@ -1,6 +1,8 @@
 import os
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from ast import literal_eval
+from datetime import date
+from calendar import monthrange
 
 class ConfigError(ValueError):
     pass
@@ -202,3 +204,44 @@ class Config(ConfigParser):
             return self._generic_multi_getter("output", "resolution", override)
         except ConfigError:
             return (None, None)
+
+    def get_min_date(self):
+        """ Get the earliest date to use for tracks. If not present in
+        the config, return None
+        """
+        try:
+            minyear = self._generic_single_getter("input", "minyear")
+        except ConfigError:
+            return None
+        try:
+            minmonth = self._generic_single_getter("input", "minmonth")
+        except ConfigError:
+            minmonth = 1
+            minday = 1
+        else:
+            try:
+                minday = self._generic_single_getter("input", "minday")
+            except ConfigError:
+                minday = 1
+        return date(minyear, minmonth, minday)
+
+    def get_max_date(self):
+        """ Get the latest date to use for tracks. If not present in
+        the config, return None
+        """
+        try:
+            maxyear = self._generic_single_getter("input", "maxyear")
+        except ConfigError:
+            return None
+        try:
+            maxmonth = self._generic_single_getter("input", "maxmonth")
+        except ConfigError:
+            maxmonth = 12
+            maxday = 31
+        else:
+            try:
+                maxday = self._generic_single_getter("input", "maxday")
+            except ConfigError:
+                maxday = monthrange(maxyear, maxmonth)[1]
+        return date(maxyear, maxmonth, maxday)
+
