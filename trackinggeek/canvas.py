@@ -236,6 +236,18 @@ class Canvas(object):
                         bounds.max_longitude < self.min_longitude:
                     print("Outside our specified area")
                     return
+            min_date = self.config.get_min_date()
+            max_date = self.config.get_max_date()
+            if min_date or max_date:
+                time_bounds = parsed.get_time_bounds()
+                end_date = time_bounds.end_time.date()
+                start_date = time_bounds.start_time.date()
+                if min_date and end_date < min_date:
+                    print("Before the specified time range")
+                    return
+                if max_date and start_date > max_date:
+                    print("After the specified time range")
+                    return
             if self.config.savememory():
                 self._track_paths.append(path)
             else:
