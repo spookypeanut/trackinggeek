@@ -210,17 +210,20 @@ class Config(ConfigParser):
         the config, return None
         """
         try:
-            minyear = self._generic_single_getter("input", "minyear")
+            minyear = int(self._generic_single_getter("input", "minyear",
+                            None))
         except ConfigError:
             return None
         try:
-            minmonth = self._generic_single_getter("input", "minmonth")
+            minmonth = int(self._generic_single_getter("input", "minmonth",
+                            None))
         except ConfigError:
             minmonth = 1
             minday = 1
         else:
             try:
-                minday = self._generic_single_getter("input", "minday")
+                minday = int(self._generic_single_getter("input", "minday",
+                            None))
             except ConfigError:
                 minday = 1
         return date(minyear, minmonth, minday)
@@ -230,17 +233,20 @@ class Config(ConfigParser):
         the config, return None
         """
         try:
-            maxyear = self._generic_single_getter("input", "maxyear")
+            maxyear = int(self._generic_single_getter("input", "maxyear",
+                None))
         except ConfigError:
             return None
         try:
-            maxmonth = self._generic_single_getter("input", "maxmonth")
+            maxmonth = int(self._generic_single_getter("input", "maxmonth",
+                None))
         except ConfigError:
             maxmonth = 12
             maxday = 31
         else:
             try:
-                maxday = self._generic_single_getter("input", "maxday")
+                maxday = int(self._generic_single_getter("input", "maxday",
+                    None))
             except ConfigError:
                 maxday = monthrange(maxyear, maxmonth)[1]
         return date(maxyear, maxmonth, maxday)
