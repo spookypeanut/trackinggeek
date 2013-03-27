@@ -50,8 +50,13 @@ class Canvas(object):
         self._track_objects = []
         self._track_paths = []
 
+        # TODO: Have these settable in the config 
         self.min_elevation = None
         self.max_elevation = None
+
+        # TODO: Have these settable in the config 
+        self.min_speed = None
+        self.max_speed = None
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
         """ Calculate the size of the image in pixels, given whatever
@@ -151,15 +156,24 @@ class Canvas(object):
         lw_type = self.config.get_linewidth_type() 
         if lw_type == "constant":
             return(self.config.get_linewidth())
+        lw_min = self.config.get_linewidth_min()
+        lw_max = self.config.get_linewidth_max()
         if lw_type == "elevation":
-            lw_min = self.config.get_linewidth_min()
-            lw_max = self.config.get_linewidth_max()
             if elevation > self.max_elevation:
                 return lw_max
             if elevation < self.min_elevation:
                 return lw_min
             fraction = 1.0 * (elevation - self.min_elevation) / \
                              (self.max_elevation - self.min_elevation)
+            width = lw_min + fraction * (lw_max - lw_min)
+            return(width)
+        if lw_type == "speed":
+            if speed > self.max_speed:
+                return lw_max
+            if speed < self.min_speed:
+                return lw_min
+            fraction = 1.0 * (speed - self.min_speed) / \
+                             (self.max_speed - self.min_speed)
             width = lw_min + fraction * (lw_max - lw_min)
             return(width)
 
@@ -304,6 +318,10 @@ class Canvas(object):
             self.add_track(i)
             counter += 1
 
+    def _detect_speeds(self):
+        # In km/h
+        self.min_speed = 1
+        self.max_speed = 160
 
     def _detect_elevations(self):
         if self._colour_is_constant() and \
@@ -335,6 +353,8 @@ class Canvas(object):
             self.min_longitude = self.auto_min_longitude
         if not self.max_longitude:
             self.max_longitude = self.auto_max_longitude
+        if not self.min_speed:
+            self._detect_speeds()
         if not self.min_elevation:
             self._detect_elevations()
         self._calc_pixel_dimensions(self.pixel_dimensions)
