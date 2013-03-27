@@ -150,6 +150,14 @@ class Canvas(object):
             fraction = (elevation - self.min_elevation) / \
                        (self.max_elevation - self.min_elevation)
             return _interpolate_palette(fraction, palette)
+        if lw_type == "speed":
+            if speed > self.max_speed:
+                return _interpolate_palette(1.0, palette)
+            if speed < self.min_speed:
+                return _interpolate_palette(0.0, palette)
+            fraction = (speed - self.min_speed) / \
+                       (self.max_speed - self.min_speed)
+            return _interpolate_palette(fraction, palette)
         raise NotImplementedError
             
     def _get_linewidth(self, speed, elevation):
@@ -321,7 +329,7 @@ class Canvas(object):
     def _detect_speeds(self):
         # In km/h
         self.min_speed = 1
-        self.max_speed = 160
+        self.max_speed = 100
 
     def _detect_elevations(self):
         if self._colour_is_constant() and \
