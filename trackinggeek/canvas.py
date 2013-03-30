@@ -138,26 +138,26 @@ class Canvas(object):
         if lw_type == "constant":
             return(self.config.get_colour())
         try:
-            palette = self.config.get_palette()
+            palette = Palette(self.config.get_palette())
         except ConfigError:
             print("Warning: no palette in config")
-            palette = {0.0:(0,0,0), 1.0:(1,1,1)}
+            palette = Palette({0.0:(0,0,0), 1.0:(1,1,1)})
         if lw_type == "elevation":
             if elevation > self.max_elevation:
-                return _interpolate_palette(1.0, palette)
+                return palette.interpolate(1.0)
             if elevation < self.min_elevation:
-                return _interpolate_palette(0.0, palette)
+                return palette.interpolate(0.0)
             fraction = (elevation - self.min_elevation) / \
                        (self.max_elevation - self.min_elevation)
-            return _interpolate_palette(fraction, palette)
+            return palette.interpolate(fraction)
         if lw_type == "speed":
             if speed > self.max_speed:
-                return _interpolate_palette(1.0, palette)
+                return palette.interpolate(1.0)
             if speed < self.min_speed:
-                return _interpolate_palette(0.0, palette)
+                return palette.interpolate(0.0)
             fraction = (speed - self.min_speed) / \
                        (self.max_speed - self.min_speed)
-            return _interpolate_palette(fraction, palette)
+            return palette.interpolate(fraction)
         raise NotImplementedError
             
     def _get_linewidth(self, speed, elevation):
@@ -396,20 +396,23 @@ class Canvas(object):
         self.surface.finish()
         raise NotImplementedError
 
-def _interpolate_palette(fraction, palette):
-    value_list = sorted(palette.keys())
-    if fraction in value_list:
-        return palette[fraction]
-    previous_value = value_list[0]
-    for value in value_list:
-        if fraction > value:
-            previous_value = value
-            continue
-        colour_fraction = (fraction - previous_value) / \
-                          (value - previous_value)
-        return _interpolate_colours(colour_fraction, palette[previous_value],
-                                    palette[value])
-
+class Palette(dict):
+    """ A colour palette, defined as a dictionary with the keys as numbers
+    (0-1) with a colour as their values.
+    """
+    def interpolate(self, fraction):
+        if fraction in self.keys():
+            return self[fraction]
+        value_list = sorted(self.keys())
+        previous_value = value_list[0]
+        for value in value_list:
+            if fraction > value:
+                previous_value = value
+                continue
+            colour_fraction = (fraction - previous_value) / \
+                              (value - previous_value)
+            return _interpolate_colours(colour_fraction, self[previous_value],
+                                        self[value])
 
 def _interpolate_colours(fraction, start, end):
     output = []
