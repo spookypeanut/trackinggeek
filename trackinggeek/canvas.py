@@ -20,6 +20,7 @@ import gpxpy
 import math
 from .point import Point
 from .config import ConfigError
+from trackinggeek.track import Track
 
 #MODE = "RGBA"
 MODE = "L"
@@ -244,65 +245,50 @@ class Canvas(object):
             return len(self._track_objects)
 
     def add_track(self, path):
-        with open(path, "r") as gpx_file:
-            try:
-                parsed = gpxpy.parse(gpx_file)
-            except Exception:
-                print("File did not parse correctly, skipping")
+        nt = Track(path)
+        if self.max_latitude:
+            if nt.min_latitude > self.max_latitude or \
+                    nt.max_latitude < self.min_latitude or \
+                    nt.min_longitude > self.max_longitude or \
+                    nt.max_longitude < self.min_longitude:
+                print("Outside our specified area")
                 return
-            bounds = parsed.get_bounds()
-            if self.max_latitude:
-                if bounds.min_latitude > self.max_latitude or \
-                        bounds.max_latitude < self.min_latitude or \
-                        bounds.min_longitude > self.max_longitude or \
-                        bounds.max_longitude < self.min_longitude:
-                    print("Outside our specified area")
-                    return
-            min_date = self.config.get_min_date()
-            max_date = self.config.get_max_date()
-            if min_date or max_date:
-                time_bounds = parsed.get_time_bounds()
-                end_date = time_bounds.end_time.date()
-                start_date = time_bounds.start_time.date()
-                if min_date and end_date < min_date:
-                    print("Before the specified time range")
-                    return
-                if max_date and start_date > max_date:
-                    print("After the specified time range")
-                    return
-            if self.config.savememory():
-                self._track_paths.append(path)
-            else:
-                self._track_objects.append(parsed)
-
-            elev_extremes = parsed.get_elevation_extremes()
-
-            if self.numtracks == 1:
-                self.auto_min_latitude = bounds.min_latitude
-                self.auto_max_latitude = bounds.max_latitude
-                self.auto_min_longitude = bounds.min_longitude
-                self.auto_max_longitude = bounds.max_longitude
-                self.auto_min_elevation = elev_extremes.minimum
-                self.auto_max_elevation = elev_extremes.maximum
-                self.auto_min_elevation = elev_extremes.minimum
-                self.auto_max_elevation = elev_extremes.maximum
+        min_date = self.config.get_min_date()
+        max_date = self.config.get_max_date()
+        if min_date or max_date:
+            if min_date and nt.max_date < min_date:
+                print("Before the specified time range")
+                return
+            if max_date and nt.min_date > max_date:
+                print("After the specified time range")
                 return
 
-            if not self.min_latitude:
-                if self.auto_min_latitude > bounds.min_latitude:
-                    self.auto_min_latitude = bounds.min_latitude
-                if self.auto_max_latitude < bounds.max_latitude:
-                    self.auto_max_latitude = bounds.max_latitude
-                if self.auto_min_longitude > bounds.min_longitude:
-                    self.auto_min_longitude = bounds.min_longitude
-                if self.auto_max_longitude < bounds.max_longitude:
-                    self.auto_max_longitude = bounds.max_longitude
+        self.tracks.append(nt)
 
-            if not self.min_elevation:
-                if self.auto_min_elevation > elev_extremes.minimum:
-                    self.auto_min_elevation = elev_extremes.minimum
-                if self.auto_max_elevation < elev_extremes.maximum:
-                    self.auto_max_elevation = elev_extremes.maximum
+        if self.numtracks == 1:
+            self.auto_min_latitude = nt.min_latitude
+            self.auto_max_latitude = nt.max_latitude
+            self.auto_min_longitude = nt.min_longitude
+            self.auto_max_longitude = nt.max_longitude
+            self.auto_min_elevation = nt.min_elevation
+            self.auto_max_elevation = nt.max_elevation
+            return
+
+        if not self.min_latitude:
+            if self.auto_min_latitude > nt.min_latitude:
+                self.auto_min_latitude = nt.min_latitude
+            if self.auto_max_latitude < nt.max_latitude:
+                self.auto_max_latitude = nt.max_latitude
+            if self.auto_min_longitude > nt.min_longitude:
+                self.auto_min_longitude = nt.min_longitude
+            if self.auto_max_longitude < nt.max_longitude:
+                self.auto_max_longitude = nt.max_longitude
+
+        if not self.min_elevation:
+            if self.auto_min_elevation > nt.min_elevation:
+                self.auto_min_elevation = nt.min_elevation
+            if self.auto_max_elevation < nt.max_elevation:
+                self.auto_max_elevation = nt.max_elevation
 
     def add_path(self, path):
         if os.path.isdir(path):
