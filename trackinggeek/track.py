@@ -83,6 +83,14 @@ class Track(object):
     def max_time(self):
         return self._get_extreme("max_time")
 
+    @property
+    def min_date(self):
+        return self.min_time.date()
+
+    @property
+    def max_date(self):
+        return self.max_time.date()
+
     def _get_extreme(self, name):
         private_attr = "_%s" % name
         if not hasattr(self, private_attr):
