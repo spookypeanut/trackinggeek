@@ -40,10 +40,55 @@ class Track(object):
                     self._parsed_track = gpxpy.parse(gpx_file)
             return self._parsed_track
 
-    def get_bounds(self):
+    def _get_bounds(self):
         parsed = self.get_parsed()
-        basic_bounds = parsed.get_bounds()
-        elev_bounds = parsed.get_elevation_extremes()
-        time_bounds = parsed.get_time_bounds()
-        all_bounds = Bounds(*(basic_bounds + elev_bounds + time_bounds))
-        return all_bounds
+        self._min_latitude, self._max_latitude, \
+                self._min_longitude, self._max_longitude = \
+                parsed.get_bounds()
+        self._min_elevation, self._max_elevation = \
+                parsed.get_elevation_extremes()
+        self._min_time, self._max_time = parsed.get_time_bounds()
+
+    # Is there a way to create these procedurally, just from a list?
+
+    @property
+    def min_latitude(self):
+        return self._get_extreme("min_latitude")
+
+    @property
+    def max_latitude(self):
+        return self._get_extreme("max_latitude")
+
+    @property
+    def min_longitude(self):
+        return self._get_extreme("min_longitude")
+
+    @property
+    def max_longitude(self):
+        return self._get_extreme("max_longitude")
+
+    @property
+    def min_elevation(self):
+        return self._get_extreme("min_elevation")
+
+    @property
+    def max_elevation(self):
+        return self._get_extreme("max_elevation")
+
+    @property
+    def min_time(self):
+        return self._get_extreme("min_time")
+
+    @property
+    def max_time(self):
+        return self._get_extreme("max_time")
+
+    def _get_extreme(self, name):
+        private_attr = "_%s" % name
+        if not hasattr(self, private_attr):
+            self._get_bounds()
+        if not hasattr(self, private_attr):
+            msg = "Internal error: bound '%s' is still not present" % name
+            raise AttributeError(msg)
+        return getattr(self, private_attr)
+
