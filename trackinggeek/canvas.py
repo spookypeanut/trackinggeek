@@ -190,41 +190,40 @@ class Canvas(object):
         base_colour = self.config.get_basecolour() or DEFAULT_COLOUR
         variabletrack = not self._colour_is_constant() or \
                         not self._linewidth_is_constant()
-        for track in track.get_parsed().tracks:
-            for segment in track.segments:
-                point_generator = (p for p in segment.points)
-                first = point_generator.next()
-                pixels = self._convert_to_fraction(Point(first.latitude,
-                    first.longitude))
-                self.ctx.move_to(*pixels)
-                previous_point = first
+        for segment in track.get_segments():
+            point_generator = (p for p in segment.points)
+            first = point_generator.next()
+            pixels = self._convert_to_fraction(Point(first.latitude,
+                first.longitude))
+            self.ctx.move_to(*pixels)
+            previous_point = first
 
-                for eachpoint in point_generator:
-                    next_point = Point(eachpoint.latitude,
-                                       eachpoint.longitude)
-                    pixels = self._convert_to_fraction(next_point)
-                    self.ctx.line_to(*pixels)
-                    if not variabletrack:
-                        continue
-                    speed = eachpoint.speed(previous_point)
-                    elevation = eachpoint.elevation
-                    current_colour = self._get_colour(speed, elevation)
-                    current_width = self._get_linewidth(speed, elevation)
-                    self.ctx.set_source_rgb(*current_colour) # Solid color
-                    self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-                    self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-                    self.ctx.set_line_width(current_width / self.pixel_width)
-                    self.ctx.stroke()
-                    # Start next line
-                    self.ctx.move_to(*pixels)
-                    previous_point = eachpoint
-
+            for eachpoint in point_generator:
+                next_point = Point(eachpoint.latitude,
+                                   eachpoint.longitude)
+                pixels = self._convert_to_fraction(next_point)
+                self.ctx.line_to(*pixels)
                 if not variabletrack:
-                    self.ctx.set_source_rgb(*base_colour) # Solid color
-                    self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-                    self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-                    self.ctx.set_line_width(1.0 / self.pixel_width)
-                    self.ctx.stroke()
+                    continue
+                speed = eachpoint.speed(previous_point)
+                elevation = eachpoint.elevation
+                current_colour = self._get_colour(speed, elevation)
+                current_width = self._get_linewidth(speed, elevation)
+                self.ctx.set_source_rgb(*current_colour) # Solid color
+                self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+                self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+                self.ctx.set_line_width(current_width / self.pixel_width)
+                self.ctx.stroke()
+                # Start next line
+                self.ctx.move_to(*pixels)
+                previous_point = eachpoint
+
+            if not variabletrack:
+                self.ctx.set_source_rgb(*base_colour) # Solid color
+                self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+                self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+                self.ctx.set_line_width(1.0 / self.pixel_width)
+                self.ctx.stroke()
 
     def add_track(self, path):
         nt = Track(path)

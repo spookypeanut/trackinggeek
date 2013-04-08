@@ -40,6 +40,12 @@ class Track(object):
                     self._parsed_track = gpxpy.parse(gpx_file)
             return self._parsed_track
 
+    def get_segments(self):
+        segments = []
+        for track in self.get_parsed().tracks:
+            segments.extend(track.segments)
+        return segments
+
     def _get_bounds(self):
         parsed = self.get_parsed()
         self._min_latitude, self._max_latitude, \
