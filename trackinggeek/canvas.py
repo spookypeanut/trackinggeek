@@ -16,11 +16,10 @@
 
 import os
 import cairo
-import gpxpy
 import math
-from .point import Point
-from .config import ConfigError
-from trackinggeek.track import Track
+from point import Point
+from config import ConfigError
+from track import Track
 
 #MODE = "RGBA"
 MODE = "L"
@@ -47,9 +46,8 @@ class Canvas(object):
 
         self.config = config
         self.pixel_dimensions = pixel_dimensions
-        self._all_tracks = []
-        self._track_objects = []
-        self._track_paths = []
+        self.potential_tracks = []
+        self.tracks = []
 
         # TODO: Have these settable in the config 
         self.min_elevation = None
@@ -188,11 +186,11 @@ class Canvas(object):
 
         raise NotImplementedError
 
-    def _draw_track(self, parsed_gpx):
+    def _draw_track(self, track):
         base_colour = self.config.get_basecolour() or DEFAULT_COLOUR
         variabletrack = not self._colour_is_constant() or \
                         not self._linewidth_is_constant()
-        for track in parsed_gpx.tracks:
+        for track in track.get_parsed().tracks:
             for segment in track.segments:
                 point_generator = (p for p in segment.points)
                 first = point_generator.next()
@@ -227,22 +225,6 @@ class Canvas(object):
                     self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
                     self.ctx.set_line_width(1.0 / self.pixel_width)
                     self.ctx.stroke()
-    
-    def get_tracks(self):
-        if self.config.savememory():
-            for path in self._track_paths:
-                with open(path, "r") as gpx_file:
-                    yield gpxpy.parse(gpx_file)
-        else:
-            for track in self._track_objects:
-                yield track
-
-    @property
-    def numtracks(self):
-        if self.config.savememory():
-            return len(self._track_paths)
-        else:
-            return len(self._track_objects)
 
     def add_track(self, path):
         nt = Track(path)
@@ -265,7 +247,7 @@ class Canvas(object):
 
         self.tracks.append(nt)
 
-        if self.numtracks == 1:
+        if len(self.tracks) == 1:
             self.auto_min_latitude = nt.min_latitude
             self.auto_max_latitude = nt.max_latitude
             self.auto_min_longitude = nt.min_longitude
@@ -304,11 +286,11 @@ class Canvas(object):
             print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
                 len(filenames), dir_path))
             for i in gpxfiles:
-                self._all_tracks.append(os.path.join(dir_path, i))
+                self.potential_tracks.append(os.path.join(dir_path, i))
         counter = 1
-        for i in self._all_tracks:
+        for i in self.potential_tracks:
             print("Adding file %4d/%4d: %s" % (counter,
-                                               len(self._all_tracks), i))
+                                               len(self.potential_tracks), i))
             self.add_track(i)
             counter += 1
 
@@ -324,19 +306,17 @@ class Canvas(object):
             return
         currmin = None
         currmax = None
-        print("Detecting min & max elevation (%s tracks)" % self.numtracks)
-        for track in self.get_tracks():
+        print("Detecting min & max elevation (%s tracks)" % len(self.tracks))
+        for track in self.tracks:
             if not currmin:
-                elev_extremes = track.get_elevation_extremes()
-                currmin = elev_extremes.minimum
-                currmax = elev_extremes.maximum
+                currmin = track.min_elevation
+                currmax = track.max_elevation
                 continue
-            currmin = min(currmin, elev_extremes.minimum)
-            currmax = max(currmax, elev_extremes.maximum)
+            currmin = min(currmin, track.min_elevation)
+            currmax = max(currmax, track.max_elevation)
         self.min_elevation = currmin
         self.max_elevation = currmax
-        print("Detected minimum elevation is %s" % self.min_elevation)
-        print("Detected maximum elevation is %s" % self.max_elevation)
+        print("Detected range is %s - %s" % (currmin, currmax))
 
     def draw(self):
         if not self.min_latitude:
@@ -366,10 +346,10 @@ class Canvas(object):
                 self.ctx.set_source_rgba(*bkg)
             self.ctx.paint()
 
-        print("Drawing %s tracks" % self.numtracks)
         counter = 0
-        total = self.numtracks
-        for track in self.get_tracks():
+        total = len(self.tracks)
+        print("Drawing %s tracks" % total)
+        for track in self.tracks:
             counter += 1
             if counter % 10 == 0:
                 print("Drawn %s of %s" % (counter, total))
