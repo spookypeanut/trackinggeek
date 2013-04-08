@@ -27,6 +27,9 @@ DEFAULT_COLOUR = (0.3, 0.2, 0.5)
 DEFAULT_SIZE = 1024
 
 class Canvas(object):
+    """ An object to draw our tracks on, and output the resulting image
+    in a selection of formats
+    """
     def __init__(self, latitude_range=None, longitude_range=None,
                  pixel_dimensions=None, config=None):
         # TODO: Have ability to override the automatic lat/long range
@@ -119,7 +122,6 @@ class Canvas(object):
         # a pixel, not on the edge
         y = 1 - (0.5 / self.pixel_height) - (merc_lat - merc_min) / \
                 (merc_max - merc_min)
-        #print ("Converted to %s, %s)" % (x, y))
         return (x, y)
 
     def _colour_is_constant(self):
@@ -244,8 +246,11 @@ class Canvas(object):
                 print("After the specified time range")
                 return
 
+        # At this point we know the track is one that we want
         self.tracks.append(nt)
 
+        # If we only have one track, we use its bounds as our
+        # auto-detected bounds
         if len(self.tracks) == 1:
             self.auto_min_latitude = nt.min_latitude
             self.auto_max_latitude = nt.max_latitude
@@ -255,6 +260,8 @@ class Canvas(object):
             self.auto_max_elevation = nt.max_elevation
             return
 
+        # If we don't have a minimum latitude specified, grow our
+        # auto-detected bounds accordingly
         if not self.min_latitude:
             if self.auto_min_latitude > nt.min_latitude:
                 self.auto_min_latitude = nt.min_latitude
@@ -265,6 +272,7 @@ class Canvas(object):
             if self.auto_max_longitude < nt.max_longitude:
                 self.auto_max_longitude = nt.max_longitude
 
+        # Likewise, grow the auto-elevation bounds
         if not self.min_elevation:
             if self.auto_min_elevation > nt.min_elevation:
                 self.auto_min_elevation = nt.min_elevation
@@ -355,6 +363,8 @@ class Canvas(object):
             self._draw_track(track)
 
     def save_png(self, path):
+        """ Save the canvas as a png file
+        """
         self.surface.write_to_png(path)
 
     def save_svg(self, path):
