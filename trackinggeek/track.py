@@ -16,11 +16,6 @@
 
 import gpxpy
 import os.path
-import collections
-
-Bounds = collections.namedtuple('Bounds',
-        ('min_latitude', 'max_latitude', 'min_longitude', 'max_longitude',
-         'min_elevation', 'max_elevation', 'min_time', 'max_time'))
 
 class Track(object):
     def __init__(self, path, save_memory=False):

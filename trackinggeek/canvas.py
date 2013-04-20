@@ -21,8 +21,6 @@ from point import Point
 from config import ConfigError
 from track import Track
 
-#MODE = "RGBA"
-MODE = "L"
 DEFAULT_COLOUR = (0.3, 0.2, 0.5)
 DEFAULT_SIZE = 1024
 
@@ -118,8 +116,8 @@ class Canvas(object):
         merc_lat = self._merc_lat(point.lat)
         merc_min = self._merc_lat(self.min_latitude)
         merc_max = self._merc_lat(self.max_latitude)
-        # Subtract half a pixel width so that we're drawing in the centre of
-        # a pixel, not on the edge
+        # Subtract half a pixel width so that we're drawing in the
+        # centre of a pixel, not on the edge
         y = 1 - (0.5 / self.pixel_height) - (merc_lat - merc_min) / \
                 (merc_max - merc_min)
         return (x, y)
