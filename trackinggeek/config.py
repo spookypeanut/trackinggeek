@@ -55,6 +55,14 @@ class Config(ConfigParser):
             # should have sensible defaults
             raise ConfigError("Entry [%s, %s] not found" % (section, entry))
 
+    def do_timelapse(self, override=None):
+        try:
+            value = self._generic_single_getter("output", "timelapse",
+                                                override)
+        except ConfigError:
+            return False
+        return stringtobool(value)
+
     def get_palette(self):
         return self.get_palette_by_name(self.get_palette_name())
 
@@ -176,7 +184,7 @@ class Config(ConfigParser):
             value = self._generic_single_getter("input", "savememory",
                                                 override)
         except ConfigError:
-            return None
+            return False
         return stringtobool(value)
 
     def get_min_resolution(self, override=None):
