@@ -1,4 +1,5 @@
 *.py[co]
+exampleoutput.png
 
 # Packages
 *.egg
