@@ -55,9 +55,25 @@ class Config(ConfigParser):
             # should have sensible defaults
             raise ConfigError("Entry [%s, %s] not found" % (section, entry))
 
+    def get_units_per_frame(self, override=None):
+        try:
+            value = self._generic_single_getter("timelapse", "unitsperframe",
+                                                override)
+        except ConfigError:
+            return 1
+        return int(value)
+
+    def get_timelapse_unit(self, override=None):
+        try:
+            value = self._generic_single_getter("timelapse", "unit",
+                                                override)
+        except ConfigError:
+            return "track"
+        return value
+
     def do_timelapse(self, override=None):
         try:
-            value = self._generic_single_getter("output", "timelapse",
+            value = self._generic_single_getter("timelapse", "timelapse",
                                                 override)
         except ConfigError:
             return False
