@@ -29,7 +29,7 @@ class Canvas(object):
     in a selection of formats
     """
     def __init__(self, latitude_range=None, longitude_range=None,
-                 pixel_dimensions=None, config=None):
+                 pixel_dimensions=None, config=None, frame_num=None):
         # TODO: Have ability to override the automatic lat/long range
         if latitude_range:
             self.min_latitude = float(latitude_range[0])
@@ -57,6 +57,8 @@ class Canvas(object):
         # TODO: Have these settable in the config 
         self.min_speed = None
         self.max_speed = None
+
+        self.frame_num = frame_num
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
         """ Calculate the size of the image in pixels, given whatever
@@ -363,11 +365,21 @@ class Canvas(object):
     def save_png(self, path):
         """ Save the canvas as a png file
         """
+        path = _add_num_to_path(path, self.frame_num)
         self.surface.write_to_png(path)
 
     def save_svg(self, path):
+        path = _add_num_to_path(path, self.frame_num)
         self.surface.finish()
         raise NotImplementedError
+
+def _add_num_to_path(path, number):
+    """ Convert an unnumbered path into a numbered one.
+    E.g. blah.txt -> blah.0001.txt
+    """
+    if number is None:
+        return path
+    return (".%04d." % number).join(path.rsplit(".", 1))
 
 class Palette(dict):
     """ A colour palette, defined as a dictionary with the keys as numbers
