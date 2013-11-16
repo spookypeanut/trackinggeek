@@ -9,6 +9,12 @@ class CanvasGroup(object):
                                         latitude_range=latitude_range,
                                         longitude_range=longitude_range,
                                         config=config))
+            return
+        raise NotImplementedError("Not done timelapse yet")
+
+    def draw(self):
+        for canvas in self.canvases:
+            canvas.draw()
 
     def add_path(self, inputpath):
         for i in self.canvases:
