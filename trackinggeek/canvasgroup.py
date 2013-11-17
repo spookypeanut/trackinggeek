@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from trackinggeek.canvas import Canvas
+from trackinggeek.util import tracks_from_path
 
 class _timelapse_options(object):
     def __init__(self, unit, number):
@@ -22,11 +23,11 @@ class _timelapse_options(object):
         self.units_per_frame = number
 
 class Frame(object):
-    def __init__(self, canvas, paths):
+    def __init__(self, canvas, tracks):
         self.canvas = canvas
-        self.paths = paths
-        for path in paths:
-            self.canvas.add_path(path)
+        self.tracks = tracks
+        for track in tracks:
+            self.canvas.add_track(track)
 
 class CanvasGroup(object):
     def __init__(self, pixel_dimensions,
@@ -36,7 +37,7 @@ class CanvasGroup(object):
         self.longitude_range = longitude_range
         self.config = config
 
-        self.paths = []
+        self.tracks = []
         if not config.do_timelapse():
             self.timelapse = None
         else:
@@ -53,29 +54,31 @@ class CanvasGroup(object):
         if self._frames_prepared:
             return
         self.frames = []
-        self._sort_paths()
+        self._sort_tracks()
         if not self.timelapse:
-            self.frames.append(Frame(self._get_canvas(), self.paths))
+            self.frames.append(Frame(self._get_canvas(), self.tracks))
         elif self.timelapse.unit == "track":
             batchsize = self.timelapse.units_per_frame
             counter = 1
             # This splits a list into batches, ie
             # [1,2,3,4,5] -> [[1,2],[3,4],[5]]
-            for pathlist in [self.paths[i:i+batchsize] for i in 
-                                range(0, len(self.paths), batchsize)]:
+            for tracklist in [self.tracks[i:i+batchsize] for i in 
+                                range(0, len(self.tracks), batchsize)]:
+                print("Doing frame %s" % counter)
+                print("tracklist = %s" % (tracklist,))
                 canvas = self._get_canvas(number=counter)
-                self.frames.append(Frame(canvas, pathlist))
+                self.frames.append(Frame(canvas, tracklist))
                 counter += 1
         else:
             raise NotImplementedError("Don't know how to handle %s" %
                     self.timelapse)
         self._frames_prepared = True
 
-    def _sort_paths(self):
-        if self._paths_sorted:
+    def _sort_tracks(self):
+        if self._tracks_sorted:
             return
-        self.paths.sort()
-        self._paths_sorted = True
+        self.tracks.sort()
+        self._tracks_sorted = True
 
     def draw(self):
         self._prepare_frames()
@@ -83,9 +86,9 @@ class CanvasGroup(object):
             frame.canvas.draw()
 
     def add_path(self, inputpath):
-        self._paths_sorted = False
+        self._tracks_sorted = False
         self._frames_prepared = False
-        self.paths.append(inputpath)
+        self.tracks.extend(tracks_from_path(inputpath))
 
     def save_png(self, filepath):
         for frame in self.frames:
