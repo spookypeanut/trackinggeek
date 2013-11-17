@@ -286,6 +286,7 @@ class Canvas(object):
             self.add_track(path)
 
     def add_directory(self, directory):
+        # TODO: Use util.tracks_from_path
         print("Getting tracks from %s" % directory)
         for dir_path, _, filenames in os.walk(directory):
             gpxfiles = [filename for filename in filenames if
