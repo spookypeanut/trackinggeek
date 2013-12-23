@@ -1,0 +1,2 @@
+class GenericImageOutput(object):
+    pass
