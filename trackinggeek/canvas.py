@@ -21,7 +21,7 @@ from config import ConfigError
 from track import Track
 
 from trackinggeek.util import mercator_adjust
-from trackinggeek.colour import Palette, DEFAULT_COLOUR, DEFAULT_PALETTE
+from trackinggeek.colour import DEFAULT_COLOUR, DEFAULT_PALETTE
 
 DEFAULT_SIZE = 1024
 
@@ -134,7 +134,7 @@ class Canvas(object):
         if lw_type == "constant":
             return(self.config.get_colour())
         try:
-            palette = Palette(self.config.get_palette())
+            palette = self.config.get_palette()
         except ConfigError:
             print("Warning: no palette in config")
             palette = DEFAULT_PALETTE

@@ -4,6 +4,8 @@ from ast import literal_eval
 from datetime import date
 from calendar import monthrange
 
+from trackinggeek.colour import Palette
+
 class ConfigError(ValueError):
     pass
 
@@ -80,7 +82,7 @@ class Config(ConfigParser):
         return stringtobool(value)
 
     def get_palette(self):
-        return self.get_palette_by_name(self.get_palette_name())
+        return Palette(self.get_palette_by_name(self.get_palette_name()))
 
     def get_palette_name(self):
         try:
