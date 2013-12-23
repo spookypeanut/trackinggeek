@@ -16,12 +16,13 @@
 
 import os
 import cairo
-import math
 from point import Point
 from config import ConfigError
 from track import Track
 
-DEFAULT_COLOUR = (0.3, 0.2, 0.5)
+from trackinggeek.util import mercator_adjust
+from trackinggeek.colour import Palette, DEFAULT_COLOUR, DEFAULT_PALETTE
+
 DEFAULT_SIZE = 1024
 
 class Canvas(object):
@@ -99,12 +100,6 @@ class Canvas(object):
             return
         raise ValueError("Could not calculate the image resolution")
 
-    def _merc_lat(self, lat):
-        """ Create a mercator projection-adjusted latitude
-        """
-        return 180 / math.pi * math.log(math.tan(math.pi / 4 + lat *
-                                                    (math.pi / 180) / 2))
-
     def _convert_to_fraction(self, point):
         """ Convert a lat/long point into an (x,y) fraction of the drawing area
         """
@@ -115,9 +110,9 @@ class Canvas(object):
         # a pixel, not on the edge
         x = 0.5 / self.pixel_width + (point.long - self.min_longitude) / \
             (self.max_longitude - self.min_longitude)
-        merc_lat = self._merc_lat(point.lat)
-        merc_min = self._merc_lat(self.min_latitude)
-        merc_max = self._merc_lat(self.max_latitude)
+        merc_lat = mercator_adjust(point.lat)
+        merc_min = mercator_adjust(self.min_latitude)
+        merc_max = mercator_adjust(self.max_latitude)
         # Subtract half a pixel width so that we're drawing in the
         # centre of a pixel, not on the edge
         y = 1 - (0.5 / self.pixel_height) - (merc_lat - merc_min) / \
@@ -142,7 +137,7 @@ class Canvas(object):
             palette = Palette(self.config.get_palette())
         except ConfigError:
             print("Warning: no palette in config")
-            palette = Palette({0.0:(0,0,0), 1.0:(1,1,1)})
+            palette = DEFAULT_PALETTE
         if lw_type == "elevation":
             if elevation > self.max_elevation:
                 return palette.interpolate(1.0)
@@ -382,27 +377,3 @@ def _add_num_to_path(path, number):
         return path
     return (".%04d." % number).join(path.rsplit(".", 1))
 
-class Palette(dict):
-    """ A colour palette, defined as a dictionary with the keys as numbers
-    (0-1) with a colour as their values.
-    """
-    def interpolate(self, fraction):
-        if fraction in self.keys():
-            return self[fraction]
-        value_list = sorted(self.keys())
-        previous_value = value_list[0]
-        for value in value_list:
-            if fraction > value:
-                previous_value = value
-                continue
-            colour_fraction = (fraction - previous_value) / \
-                              (value - previous_value)
-            return _interpolate_colours(colour_fraction, self[previous_value],
-                                        self[value])
-
-def _interpolate_colours(fraction, start, end):
-    output = []
-    for i in range(3):
-        diff = end[i] - start[i]
-        output.append(start[i] + diff * fraction)
-    return tuple(output)

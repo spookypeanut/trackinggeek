@@ -1,3 +1,4 @@
+import math
 import os
 
 def tracks_from_path(path):
@@ -19,3 +20,10 @@ def tracks_from_path(path):
         for i in gpxfiles:
             tracks.add(os.path.join(dir_path, i))
     return tracks
+
+def mercator_adjust(self, lat):
+    """ Create a mercator projection-adjusted latitude
+    """
+    return 180 / math.pi * math.log(math.tan(math.pi / 4 + lat *
+                                                (math.pi / 180) / 2))
+
