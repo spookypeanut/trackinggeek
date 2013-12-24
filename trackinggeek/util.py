@@ -1,6 +1,14 @@
 import math
 import os
 
+def add_num_to_path(path, number):
+    """ Convert an unnumbered path into a numbered one.
+    E.g. blah.txt -> blah.0001.txt
+    """
+    if number is None:
+        return path
+    return (".%04d." % number).join(path.rsplit(".", 1))
+
 def tracks_from_path(path):
     """ Given a path, which could be a directory, return an iterable (set
     probably) of full paths to gpx track files

@@ -20,7 +20,7 @@ from point import Point
 from config import ConfigError
 from track import Track
 
-from trackinggeek.util import mercator_adjust
+from trackinggeek.util import mercator_adjust, add_num_to_path
 from trackinggeek.colour import DEFAULT_COLOUR, DEFAULT_PALETTE
 
 DEFAULT_SIZE = 1024
@@ -361,19 +361,11 @@ class Canvas(object):
     def save_png(self, path):
         """ Save the canvas as a png file
         """
-        path = _add_num_to_path(path, self.frame_num)
+        path = add_num_to_path(path, self.frame_num)
         self.surface.write_to_png(path)
 
     def save_svg(self, path):
-        path = _add_num_to_path(path, self.frame_num)
+        path = add_num_to_path(path, self.frame_num)
         self.surface.finish()
         raise NotImplementedError
-
-def _add_num_to_path(path, number):
-    """ Convert an unnumbered path into a numbered one.
-    E.g. blah.txt -> blah.0001.txt
-    """
-    if number is None:
-        return path
-    return (".%04d." % number).join(path.rsplit(".", 1))
 
