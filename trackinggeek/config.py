@@ -277,3 +277,8 @@ class Config(ConfigParser):
                 maxday = monthrange(maxyear, maxmonth)[1]
         return date(maxyear, maxmonth, maxday)
 
+    def colour_is_constant(self):
+        return self.get_colour_type() == "constant"
+
+    def linewidth_is_constant(self):
+        return self.get_linewidth_type() == "constant"

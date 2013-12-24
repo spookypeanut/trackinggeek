@@ -29,7 +29,7 @@ def tracks_from_path(path):
             tracks.add(os.path.join(dir_path, i))
     return tracks
 
-def mercator_adjust(self, lat):
+def mercator_adjust(lat):
     """ Create a mercator projection-adjusted latitude
     """
     return 180 / math.pi * math.log(math.tan(math.pi / 4 + lat *

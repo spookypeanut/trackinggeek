@@ -17,7 +17,7 @@
 
 import sys
 import argparse
-from trackinggeek.canvasgroup import CanvasGroup
+from trackinggeek.singleimage import SingleImage
 from trackinggeek.config import Config
 
 def main():
@@ -69,7 +69,7 @@ def main():
     outsvg = config.get_outsvg(args.outsvg)
     outma = config.get_outma(args.outma)
 
-    c = CanvasGroup(pixel_dimensions=pixel_dimensions,
+    c = SingleImage(pixel_dimensions=pixel_dimensions,
                     latitude_range=latitude_range,
                     longitude_range=longitude_range,
                     config=config)
