@@ -17,7 +17,7 @@
 import os
 
 from trackinggeek.track import Track
-from trackinggeek.util import mercator_adjust
+from trackinggeek.util import mercator_adjust, tracks_from_path
 
 DEFAULT_SIZE = 1024
 
@@ -166,24 +166,6 @@ class GenericImageOutput(object):
             if self.auto_max_elevation < nt.max_elevation:
                 self.auto_max_elevation = nt.max_elevation
 
-    def add_directory(self, directory):
-        # TODO: Use util.tracks_from_path
-        print("Getting tracks from %s" % directory)
-        potential_tracks = []
-        for dir_path, _, filenames in os.walk(directory):
-            gpxfiles = [filename for filename in filenames if
-                    os.path.splitext(filename)[-1] == ".gpx"]
-            print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
-                len(filenames), dir_path))
-            for i in gpxfiles:
-                potential_tracks.append(os.path.join(dir_path, i))
-        counter = 1
-        for i in potential_tracks:
-            print("Adding file %4d/%4d: %s" % (counter,
-                                               len(potential_tracks), i))
-            self.add_track(i)
-            counter += 1
-
     def _detect_elevations(self):
         if self.config.colour_is_constant() and \
                 self.config.linewidth_is_constant():
@@ -204,8 +186,6 @@ class GenericImageOutput(object):
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_path(self, path):
-        if os.path.isdir(path):
-            self.add_directory(path)
-        else:
-            self.add_track(path)
+        for track in tracks_from_path(path):
+            self.add_track(track)
 
