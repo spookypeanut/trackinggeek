@@ -119,16 +119,16 @@ class GenericImageOutput(object):
                     nt.max_latitude < self.min_latitude or \
                     nt.min_longitude > self.max_longitude or \
                     nt.max_longitude < self.min_longitude:
-                print("Outside our specified area")
+                #print("Outside our specified area")
                 return
         min_date = self.config.get_min_date()
         max_date = self.config.get_max_date()
         if min_date or max_date:
             if min_date and nt.max_date < min_date:
-                print("Before the specified time range")
+                #print("Before the specified time range")
                 return
             if max_date and nt.min_date > max_date:
-                print("After the specified time range")
+                #print("After the specified time range")
                 return
 
         # At this point we know the track is one that we want
