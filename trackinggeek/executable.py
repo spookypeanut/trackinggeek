@@ -17,9 +17,21 @@
 
 import sys
 import argparse
-from trackinggeek.timelapse import Timelapse
 from trackinggeek.config import Config
+from trackinggeek.singleimage import SingleImage
+from trackinggeek.timelapse import Timelapse
 
+def OutputImage(pixel_dimensions, latitude_range, longitude_range, config):
+    if config.do_timelapse():
+        return Timelapse(pixel_dimensions=pixel_dimensions,
+                         latitude_range=latitude_range,
+                         longitude_range=longitude_range,
+                         config=config)
+    return SingleImage(pixel_dimensions=pixel_dimensions,
+                         latitude_range=latitude_range,
+                         longitude_range=longitude_range,
+                         config=config)
+    
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', action='store',
@@ -69,7 +81,7 @@ def main():
     outsvg = config.get_outsvg(args.outsvg)
     outma = config.get_outma(args.outma)
 
-    c = Timelapse(pixel_dimensions=pixel_dimensions,
+    c = OutputImage(pixel_dimensions=pixel_dimensions,
                     latitude_range=latitude_range,
                     longitude_range=longitude_range,
                     config=config)
