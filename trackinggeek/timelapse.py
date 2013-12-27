@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from copy import deepcopy
 from trackinggeek.genericimageoutput import GenericImageOutput
 from trackinggeek.canvas import Canvas
 from trackinggeek.util import add_num_to_path
@@ -70,12 +71,14 @@ class Timelapse(GenericImageOutput):
             counter = 1
             # This splits a list into batches, ie
             # [1,2,3,4,5] -> [[1,2],[3,4],[5]]
+            cumulative_tracks = []
             for tracklist in [self.tracks[i:i+batchsize] for i in 
                                 range(0, len(self.tracks), batchsize)]:
                 print("Doing frame %s" % counter)
-                print("tracklist = %s" % (tracklist,))
+                cumulative_tracks.extend(tracklist)
                 canvas = self._get_canvas(counter)
-                self.frames.append(Frame(canvas=canvas, tracks=tracklist,
+                self.frames.append(Frame(canvas=canvas,
+                                         tracks=deepcopy(cumulative_tracks),
                                          frame_number=counter))
                 counter += 1
         else:
