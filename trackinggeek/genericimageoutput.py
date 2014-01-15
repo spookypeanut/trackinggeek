@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from trackinggeek.track import Track
+from trackinggeek.track import TrackLibrary
 from trackinggeek.util import mercator_adjust, tracks_from_path
 
 DEFAULT_SIZE = 1024
@@ -113,58 +113,60 @@ class GenericImageOutput(object):
         self.max_speed = 100
 
     def add_track(self, path):
-        nt = Track(path)
+        tl = TrackLibrary()
+        tl.add_track(path)
         if self.max_latitude:
-            if nt.min_latitude > self.max_latitude or \
-                    nt.max_latitude < self.min_latitude or \
-                    nt.min_longitude > self.max_longitude or \
-                    nt.max_longitude < self.min_longitude:
+            if tl[path].min_latitude > self.max_latitude or \
+                    tl[path].max_latitude < self.min_latitude or \
+                    tl[path].min_longitude > self.max_longitude or \
+                    tl[path].max_longitude < self.min_longitude:
                 #print("Outside our specified area")
                 return
         min_date = self.config.get_min_date()
         max_date = self.config.get_max_date()
         if min_date or max_date:
-            if min_date and nt.max_date < min_date:
+            if min_date and tl[path].max_date < min_date:
                 #print("Before the specified time range")
                 return
-            if max_date and nt.min_date > max_date:
+            if max_date and tl[path].min_date > max_date:
                 #print("After the specified time range")
                 return
 
         # At this point we know the track is one that we want
-        self.tracks.append(nt)
+        self.tracks.append(path)
 
         # If we only have one track, we use its bounds as our
         # auto-detected bounds
         if len(self.tracks) == 1:
-            self.auto_min_latitude = nt.min_latitude
-            self.auto_max_latitude = nt.max_latitude
-            self.auto_min_longitude = nt.min_longitude
-            self.auto_max_longitude = nt.max_longitude
-            self.auto_min_elevation = nt.min_elevation
-            self.auto_max_elevation = nt.max_elevation
+            self.auto_min_latitude = tl[path].min_latitude
+            self.auto_max_latitude = tl[path].max_latitude
+            self.auto_min_longitude = tl[path].min_longitude
+            self.auto_max_longitude = tl[path].max_longitude
+            self.auto_min_elevation = tl[path].min_elevation
+            self.auto_max_elevation = tl[path].max_elevation
             return
 
         # If we don't have a minimum latitude specified, grow our
         # auto-detected bounds accordingly
         if not self.min_latitude:
-            if self.auto_min_latitude > nt.min_latitude:
-                self.auto_min_latitude = nt.min_latitude
-            if self.auto_max_latitude < nt.max_latitude:
-                self.auto_max_latitude = nt.max_latitude
-            if self.auto_min_longitude > nt.min_longitude:
-                self.auto_min_longitude = nt.min_longitude
-            if self.auto_max_longitude < nt.max_longitude:
-                self.auto_max_longitude = nt.max_longitude
+            if self.auto_min_latitude > tl[path].min_latitude:
+                self.auto_min_latitude = tl[path].min_latitude
+            if self.auto_max_latitude < tl[path].max_latitude:
+                self.auto_max_latitude = tl[path].max_latitude
+            if self.auto_min_longitude > tl[path].min_longitude:
+                self.auto_min_longitude = tl[path].min_longitude
+            if self.auto_max_longitude < tl[path].max_longitude:
+                self.auto_max_longitude = tl[path].max_longitude
 
         # Likewise, grow the auto-elevation bounds
         if not self.min_elevation:
-            if self.auto_min_elevation > nt.min_elevation:
-                self.auto_min_elevation = nt.min_elevation
-            if self.auto_max_elevation < nt.max_elevation:
-                self.auto_max_elevation = nt.max_elevation
+            if self.auto_min_elevation > tl[path].min_elevation:
+                self.auto_min_elevation = tl[path].min_elevation
+            if self.auto_max_elevation < tl[path].max_elevation:
+                self.auto_max_elevation = tl[path].max_elevation
 
     def _detect_elevations(self):
+        tl = TrackLibrary()
         if self.config.colour_is_constant() and \
                 self.config.linewidth_is_constant():
             print("Elevation detection not required")
@@ -172,13 +174,13 @@ class GenericImageOutput(object):
         currmin = None
         currmax = None
         print("Detecting min & max elevation (%s tracks)" % len(self.tracks))
-        for track in self.tracks:
+        for path in self.tracks:
             if not currmin:
-                currmin = track.min_elevation
-                currmax = track.max_elevation
+                currmin = tl[path].min_elevation
+                currmax = tl[path].max_elevation
                 continue
-            currmin = min(currmin, track.min_elevation)
-            currmax = max(currmax, track.max_elevation)
+            currmin = min(currmin, tl[path].min_elevation)
+            currmax = max(currmax, tl[path].max_elevation)
         self.min_elevation = currmin
         self.max_elevation = currmax
         print("Detected range is %s - %s" % (currmin, currmax))

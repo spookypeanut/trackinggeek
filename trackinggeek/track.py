@@ -17,13 +17,16 @@
 import gpxpy
 import os.path
 
-class Track(object):
+class _Track(object):
     def __init__(self, path, save_memory=False):
         self.path = path
         if not os.path.exists(path):
             msg = "The gpx file '%s' does not exist"
             raise IOError(msg)
         self.save_memory = save_memory
+
+    def __hash__(self):
+        return hash(self.path)
 
     def get_parsed(self):
         if self.save_memory:
@@ -101,3 +104,14 @@ class Track(object):
             raise AttributeError(msg)
         return getattr(self, private_attr)
 
+class TrackLibrary(dict):
+    _instance = None
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(TrackLibrary, cls).__new__(cls)
+        return cls._instance
+
+    def add_track(self, path, save_memory=False):
+        if path in self:
+            return
+        self[path] = _Track(path, save_memory=save_memory)

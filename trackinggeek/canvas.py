@@ -19,6 +19,7 @@ from point import Point
 from trackinggeek.colour import DEFAULT_COLOUR, DEFAULT_PALETTE
 from trackinggeek.util import mercator_adjust
 from trackinggeek.config import ConfigError
+from trackinggeek.track import TrackLibrary
 
 class Canvas(object):
     """ An object to draw our tracks on, and output the resulting image
@@ -162,12 +163,13 @@ class Canvas(object):
 
         raise NotImplementedError
 
-    def draw_tracks(self, tracks):
+    def draw_tracks(self, paths):
+        tl = TrackLibrary()
         counter = 0
-        total = len(tracks)
+        total = len(paths)
         print("Drawing %s tracks" % total)
-        for track in tracks:
+        for path in paths:
             counter += 1
             if counter % 10 == 0:
                 print("Drawn %s of %s" % (counter, total))
-            self._draw_track(track)
+            self._draw_track(tl[path])
