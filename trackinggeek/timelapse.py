@@ -18,6 +18,7 @@ from copy import deepcopy
 from trackinggeek.genericimageoutput import GenericImageOutput
 from trackinggeek.canvas import Canvas
 from trackinggeek.util import add_num_to_path
+from trackinggeek.track import TrackLibrary
 
 class Timelapse(GenericImageOutput):
     def __init__(self, latitude_range=None, longitude_range=None,
@@ -63,17 +64,18 @@ class Timelapse(GenericImageOutput):
     def _prepare_frames(self):
         if self._frames_prepared:
             return
-        self.frames = []
+        tl = TrackLibrary()
         # TODO: We might want to do some cleverer sorting
-        self.tracks.sort()
+        tracks = tl.sort_tracks_by_time()
+        self.frames = []
         if self.timelapse_unit == "track":
             batchsize = self.units_per_frame
             counter = 1
             # This splits a list into batches, ie
             # [1,2,3,4,5] -> [[1,2],[3,4],[5]]
             cumulative_tracks = []
-            for tracklist in [self.tracks[i:i+batchsize] for i in 
-                                range(0, len(self.tracks), batchsize)]:
+            for tracklist in [tracks[i:i+batchsize] for i in 
+                                range(0, len(tracks), batchsize)]:
                 print("Doing frame %s" % counter)
                 cumulative_tracks.extend(tracklist)
                 canvas = self._get_canvas(counter)

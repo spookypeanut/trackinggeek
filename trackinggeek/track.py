@@ -115,3 +115,8 @@ class TrackLibrary(dict):
         if path in self:
             return
         self[path] = _Track(path, save_memory=save_memory)
+    
+    def sort_tracks_by_time(self):
+        """ Sort by value, but return keys """
+        return [item[0] for item in sorted(self.items(),
+                    key=lambda t: t[1].min_time)]
