@@ -89,10 +89,6 @@ def main():
         c.add_path(inputpath)
     if outma:
         c.save_ma(outma)
-    if not outpng and not outsvg:
-        return 0
-
-    c.draw()
     if outpng:
         c.save_png(outpng)
     if outsvg:

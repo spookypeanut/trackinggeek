@@ -39,17 +39,18 @@ class Timelapse(GenericImageOutput):
         self.speed_range = (self.min_speed, self.max_speed)
         self.elevation_range = (self.min_elevation, self.max_elevation)
         self._prepare_frames()
+
+    def save_png(self, path):
+        """ Save the canvas as a png file
+        """
+        self.draw()
         counter = 0
         for f in self.frames:
             counter += 1
             print("Drawing frame %s/%s" % (counter, len(self.frames)))
             f.draw()
-
-    def save_png(self, path):
-        """ Save the canvas as a png file
-        """
-        for f in self.frames:
             num_path = add_num_to_path(path, f.frame_number)
+            print("Writing png: %s" % (path,))
             f.canvas.surface.write_to_png(num_path)
 
     def save_svg(self, path):
