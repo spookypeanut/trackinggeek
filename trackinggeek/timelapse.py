@@ -50,7 +50,7 @@ class Timelapse(GenericImageOutput):
             print("Drawing frame %s/%s" % (counter, len(self.frames)))
             f.draw()
             num_path = add_num_to_path(path, f.frame_number)
-            print("Writing png: %s" % (path,))
+            print("Writing png: %s" % (num_path,))
             f.canvas.surface.write_to_png(num_path)
             f.clear()
 
