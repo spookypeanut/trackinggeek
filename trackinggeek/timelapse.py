@@ -39,7 +39,10 @@ class Timelapse(GenericImageOutput):
         self.speed_range = (self.min_speed, self.max_speed)
         self.elevation_range = (self.min_elevation, self.max_elevation)
         self._prepare_frames()
+        counter = 0
         for f in self.frames:
+            counter += 1
+            print("Drawing frame %s/%s" % (counter, len(self.frames)))
             f.draw()
 
     def save_png(self, path):
@@ -70,19 +73,25 @@ class Timelapse(GenericImageOutput):
         self.frames = []
         if self.timelapse_unit == "track":
             batchsize = self.units_per_frame
-            counter = 1
             # This splits a list into batches, ie
             # [1,2,3,4,5] -> [[1,2],[3,4],[5]]
             cumulative_tracks = []
-            for tracklist in [tracks[i:i+batchsize] for i in 
-                                range(0, len(tracks), batchsize)]:
-                print("Doing frame %s" % counter)
+            counter = 0
+            print("Creating frames")
+            startnums = xrange(0, len(tracks), batchsize)
+            # The end number should be 1 more than might be expected,
+            # because of the way python list slicing works
+            batches = [(s, s + batchsize) for s in startnums]
+            total = len(batches)
+            for tracklist in (tracks[s:e] for (s, e) in batches):
+                counter += 1
+                if counter % 10 == 0 and total > 20:
+                    print("\tCreated %s/%s frames" % (counter, total))
                 cumulative_tracks.extend(tracklist)
-                canvas = self._get_canvas(counter)
+                canvas = self._get_canvas(counter - 1)
                 self.frames.append(Frame(canvas=canvas,
                                          tracks=deepcopy(cumulative_tracks),
-                                         frame_number=counter))
-                counter += 1
+                                         frame_number=counter-1))
         else:
             raise NotImplementedError("Don't know how to handle %s" %
                     self.timelapse_unit)

@@ -44,6 +44,7 @@ class SingleImage(GenericImageOutput):
     def save_png(self, path):
         """ Save the canvas as a png file
         """
+        print("Saving png: %s" % path)
         self.canvas.surface.write_to_png(path)
 
     def save_svg(self, path):
