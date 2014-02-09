@@ -52,6 +52,7 @@ class Timelapse(GenericImageOutput):
             num_path = add_num_to_path(path, f.frame_number)
             print("Writing png: %s" % (path,))
             f.canvas.surface.write_to_png(num_path)
+            f.clear()
 
     def save_svg(self, path):
         #self.surface.finish()
@@ -107,4 +108,10 @@ class Frame(object):
         self.frame_number = frame_number
 
     def draw(self):
+        if not self.canvas:
+            raise RuntimeError("This frame has already been cleared!")
         self.canvas.draw_tracks(self.tracks)
+
+    def clear(self):
+        # This is to save memory when we're done with it
+        self.canvas = None
