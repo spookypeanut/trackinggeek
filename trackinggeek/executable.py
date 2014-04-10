@@ -69,8 +69,20 @@ def main():
     latitude_range = config.get_latitude(args.latitude)
     longitude_range = config.get_longitude(args.longitude)
 
-    elevation_range = config.get_elevation_range()
-    speed_range = config.get_speed_range()
+    tmp = config.get_elevation_range()
+    print tmp
+    if tmp:
+        print("tmp")
+        elevation_range = (float(tmp[0]), float(tmp[1]))
+    else:
+        print("no tmp")
+        elevation_range = None
+    print elevation_range
+    tmp = config.get_speed_range()
+    if tmp:
+        speed_range = (float(tmp[0]), float(tmp[1]))
+    else:
+        speed_range = None
 
     # TODO: Even if resolution is specified in the config, a
     # command-line min / max should override it 
