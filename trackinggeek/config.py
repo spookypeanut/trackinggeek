@@ -111,6 +111,18 @@ class Config(ConfigParser):
         except ConfigError:
             return None
 
+    def get_elevation_range(self, override=None):
+        try:
+            return self._generic_multi_getter("drawing", "elevation_range", override)
+        except ConfigError:
+            return None
+
+    def get_speed_range(self, override=None):
+        try:
+            return self._generic_multi_getter("drawing", "speed_range", override)
+        except ConfigError:
+            return None
+
     def get_basecolour(self, override=None):
         try:
             result = self._generic_multi_getter("drawing", "basecolour", override)

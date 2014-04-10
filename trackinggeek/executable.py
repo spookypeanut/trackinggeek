@@ -21,15 +21,20 @@ from trackinggeek.config import Config
 from trackinggeek.singleimage import SingleImage
 from trackinggeek.timelapse import Timelapse
 
-def OutputImage(pixel_dimensions, latitude_range, longitude_range, config):
+def OutputImage(pixel_dimensions, latitude_range, longitude_range,
+                elevation_range, speed_range, config):
     if config.do_timelapse():
         return Timelapse(pixel_dimensions=pixel_dimensions,
                          latitude_range=latitude_range,
                          longitude_range=longitude_range,
+                         elevation_range=elevation_range,
+                         speed_range=speed_range,
                          config=config)
     return SingleImage(pixel_dimensions=pixel_dimensions,
                          latitude_range=latitude_range,
                          longitude_range=longitude_range,
+                         elevation_range=elevation_range,
+                         speed_range=speed_range,
                          config=config)
     
 def main():
@@ -64,6 +69,9 @@ def main():
     latitude_range = config.get_latitude(args.latitude)
     longitude_range = config.get_longitude(args.longitude)
 
+    elevation_range = config.get_elevation_range()
+    speed_range = config.get_speed_range()
+
     # TODO: Even if resolution is specified in the config, a
     # command-line min / max should override it 
     pixel_dimensions["min"] = config.get_min_resolution(args.min)
@@ -84,6 +92,8 @@ def main():
     c = OutputImage(pixel_dimensions=pixel_dimensions,
                     latitude_range=latitude_range,
                     longitude_range=longitude_range,
+                    elevation_range=elevation_range,
+                    speed_range=speed_range,
                     config=config)
     if inputpath:
         c.add_path(inputpath)

@@ -22,9 +22,12 @@ from trackinggeek.track import TrackLibrary
 
 class Timelapse(GenericImageOutput):
     def __init__(self, latitude_range=None, longitude_range=None,
+                 elevation_range=None, speed_range=None,
                  pixel_dimensions=None, config=None):
         GenericImageOutput.__init__(self, latitude_range=latitude_range,
                                     longitude_range=longitude_range,
+                                    elevation_range=elevation_range,
+                                    speed_range=speed_range,
                                     pixel_dimensions=pixel_dimensions,
                                     config=config)
         self._frames_prepared = False

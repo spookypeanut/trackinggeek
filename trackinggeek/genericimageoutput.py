@@ -21,6 +21,7 @@ DEFAULT_SIZE = 1024
 
 class GenericImageOutput(object):
     def __init__(self, latitude_range=None, longitude_range=None,
+                 elevation_range=None, speed_range=None,
                  pixel_dimensions=None, config=None):
         # TODO: Have ability to override the automatic lat/long range
         if latitude_range:
@@ -42,12 +43,18 @@ class GenericImageOutput(object):
         self.tracks = []
 
         # TODO: Have these settable in the config 
-        self.min_elevation = None
-        self.max_elevation = None
+        if elevation_range:
+            self.min_elevation, self.max_elevation = elevation_range
+        else:
+            self.min_elevation = None
+            self.max_elevation = None
 
         # TODO: Have these settable in the config 
-        self.min_speed = None
-        self.max_speed = None
+        if speed_range:
+            self.min_speed, self.max_speed = speed_range
+        else:
+            self.min_speed = None
+            self.max_speed = None
 
     def draw(self):
         raise NotImplementedError
@@ -64,7 +71,7 @@ class GenericImageOutput(object):
             self.max_longitude = self.auto_max_longitude
         if not self.min_speed:
             self._detect_speeds()
-        if not self.min_elevation:
+        if self.min_elevation is None:
             self._detect_elevations()
         self._calc_pixel_dimensions(self.pixel_dimensions)
 
