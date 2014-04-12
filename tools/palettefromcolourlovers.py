@@ -2,8 +2,9 @@
 import urllib
 import re
 from ast import literal_eval
+import sys
 
-url = "http://www.colourlovers.com/palette/167613/New_Zealand"
+url = sys.argv[1]
 w = urllib.urlopen(url)
 for line in w.readlines():
     if "var _paletteColorsUI" in line:
