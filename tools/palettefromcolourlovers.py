@@ -4,6 +4,8 @@ import re
 from ast import literal_eval
 import sys
 
+# TODO: argparse
+do_background = True
 url = sys.argv[1]
 w = urllib.urlopen(url)
 for line in w.readlines():
@@ -23,13 +25,15 @@ hexlist = literal_eval(m.groups()[0])
 floatlist = []
 for h in hexlist:
     intnums = int(h[0:2],16), int(h[2:4],16), int(h[4:6],16)
-    print intnums
     stringnums = []
     for i in intnums:
         stringnums.append("%0.5f" % (float(i) / 255))
     floatlist.append(tuple(stringnums))
 
 step = 1.0 / (len(floatlist) - 1)
+if do_background:
+    background = floatlist.pop(0)
+    print("background = %s" % ",".join(background))
 currentpos = 0.0
 outstring = "{"
 strings = []
