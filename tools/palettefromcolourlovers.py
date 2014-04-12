@@ -42,7 +42,7 @@ currentpos = 0.0
 outstring = "%s = {" % name
 strings = []
 for i in floatlist:
-    outstring += "%0.1f" % currentpos 
+    outstring += "%0.2f" % currentpos 
     outstring += ": ("
     outstring += ",".join(i)
 
