@@ -14,6 +14,9 @@ for line in w.readlines():
     if "/lover/" in line:
         loverline = line
 
+extract_name = re.compile("([\w]+)/?$")
+name = extract_name.search(url).groups()[0]
+name = name.lower()
 extract_lover_url = re.compile("(/lover/[^/\"]*)")
 m = extract_lover_url.search(loverline)
 lover_partial_url = m.groups()[0]
@@ -31,11 +34,12 @@ for h in hexlist:
     floatlist.append(tuple(stringnums))
 
 step = 1.0 / (len(floatlist) - 1)
+print "palette = %s" % name
 if do_background:
     background = floatlist.pop(0)
     print("background = %s" % ",".join(background))
 currentpos = 0.0
-outstring = "{"
+outstring = "%s = {" % name
 strings = []
 for i in floatlist:
     outstring += "%0.1f" % currentpos 
