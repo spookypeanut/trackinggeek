@@ -33,11 +33,11 @@ for h in hexlist:
         stringnums.append("%0.5f" % (float(i) / 255))
     floatlist.append(tuple(stringnums))
 
-step = 1.0 / (len(floatlist) - 1)
 print "palette = %s" % name
 if do_background:
     background = floatlist.pop(0)
     print("background = %s" % ",".join(background))
+step = 1.0 / (len(floatlist) - 1)
 currentpos = 0.0
 outstring = "%s = {" % name
 strings = []
