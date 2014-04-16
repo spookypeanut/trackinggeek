@@ -14,7 +14,7 @@ for line in w.readlines():
     if "/lover/" in line:
         loverline = line
 
-extract_name = re.compile("([\w]+)/?$")
+extract_name = re.compile("([\w]+).?/?$")
 name = extract_name.search(url).groups()[0]
 name = name.lower()
 extract_lover_url = re.compile("(/lover/[^/\"]*)")
