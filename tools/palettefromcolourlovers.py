@@ -50,7 +50,7 @@ for i in floatlist:
     strings.append(outstring)
 
     currentpos += step
-    outstring = ""
+    outstring = " " * (len(name) + 4)
 
 # Replace the last , with a }
 strings[-1] = strings[-1][:-1] + "}"
