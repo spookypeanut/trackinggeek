@@ -52,6 +52,8 @@ class _Track(object):
         self._min_elevation, self._max_elevation = \
                 parsed.get_elevation_extremes()
         self._min_time, self._max_time = parsed.get_time_bounds()
+        self._min_speed = 0
+        self._max_speed = parsed.get_moving_data().max_speed
 
     # Is there a way to create these procedurally, just from a list?
 
@@ -86,6 +88,14 @@ class _Track(object):
     @property
     def max_time(self):
         return self._get_extreme("max_time")
+
+    @property
+    def min_speed(self):
+        return self._get_extreme("min_speed")
+
+    @property
+    def max_speed(self):
+        return self._get_extreme("max_speed")
 
     @property
     def min_date(self):

@@ -69,7 +69,7 @@ class GenericImageOutput(object):
             self.min_longitude = self.auto_min_longitude
         if not self.max_longitude:
             self.max_longitude = self.auto_max_longitude
-        if not self.min_speed:
+        if self.min_speed is None:
             self._detect_speeds()
         if self.min_elevation is None:
             self._detect_elevations()
@@ -116,8 +116,24 @@ class GenericImageOutput(object):
 
     def _detect_speeds(self):
         # In km/h
-        self.min_speed = 1
-        self.max_speed = 100
+        if self.config.colour_is_constant() and \
+                self.config.linewidth_is_constant():
+            print("Speed detection not required")
+            return
+        tl = TrackLibrary()
+        currmin = None
+        currmax = None
+        print("Detecting min & max speed (%s tracks)" % len(self.tracks))
+        for path in self.tracks:
+            if not currmin:
+                currmin = tl[path].min_speed
+                currmax = tl[path].max_speed
+                continue
+            currmin = min(currmin, tl[path].min_speed)
+            currmax = max(currmax, tl[path].max_speed)
+        self.min_speed = currmin
+        self.max_speed = currmax
+        print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_track(self, path):
         tl = TrackLibrary()
@@ -151,6 +167,8 @@ class GenericImageOutput(object):
             self.auto_max_longitude = tl[path].max_longitude
             self.auto_min_elevation = tl[path].min_elevation
             self.auto_max_elevation = tl[path].max_elevation
+            self.auto_min_speed = tl[path].min_speed
+            self.auto_max_speed = tl[path].max_speed
             return
 
         # If we don't have a minimum latitude specified, grow our
@@ -172,12 +190,19 @@ class GenericImageOutput(object):
             if self.auto_max_elevation < tl[path].max_elevation:
                 self.auto_max_elevation = tl[path].max_elevation
 
+        # Likewise, grow the auto-speed bounds
+        if self.min_speed is None:
+            if self.auto_min_speed > tl[path].min_speed:
+                self.auto_min_speed = tl[path].min_speed
+            if self.auto_max_speed < tl[path].max_speed:
+                self.auto_max_speed = tl[path].max_speed
+
     def _detect_elevations(self):
-        tl = TrackLibrary()
         if self.config.colour_is_constant() and \
                 self.config.linewidth_is_constant():
             print("Elevation detection not required")
             return
+        tl = TrackLibrary()
         currmin = None
         currmax = None
         print("Detecting min & max elevation (%s tracks)" % len(self.tracks))
