@@ -218,6 +218,13 @@ class GenericImageOutput(object):
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_path(self, path):
-        for track in tracks_from_path(path):
+        tracklist = tracks_from_path(path)
+        total = len(tracklist)
+        counter = 0
+        print("Parsing %i tracks" % total)
+        for track in tracklist:
             self.add_track(track)
+            counter += 1
+            if counter % 10 == 0:
+                print("\tParsed %i/%i tracks" % (counter, total))
 
