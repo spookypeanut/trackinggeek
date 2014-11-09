@@ -35,7 +35,12 @@ class _Track(object):
         else:
             if not hasattr(self, "_parsed_track"):
                 with open(self.path, "r") as gpx_file:
-                    self._parsed_track = gpxpy.parse(gpx_file)
+                    try:
+                        self._parsed_track = gpxpy.parse(gpx_file)
+                    except:
+                        # We can do a bare except, as we're re-raising
+                        print("Errored path: %s" % self.path)
+                        raise
             return self._parsed_track
 
     def get_segments(self):
