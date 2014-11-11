@@ -89,7 +89,7 @@ class Canvas(object):
                 self.ctx.line_to(*pixels)
                 if not variabletrack:
                     continue
-                speed = eachpoint.speed(previous_point)
+                speed = eachpoint.speed_between(previous_point)
                 elevation = eachpoint.elevation
                 current_colour = self._get_colour(speed, elevation)
                 current_width = self._get_linewidth(speed, elevation)
