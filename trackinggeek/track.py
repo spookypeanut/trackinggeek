@@ -17,6 +17,9 @@
 import gpxpy
 import os.path
 
+class TrackError(IOError):
+    pass
+
 class _Track(object):
     def __init__(self, path, save_memory=False):
         self.path = path
@@ -130,6 +133,8 @@ class TrackLibrary(dict):
         if path in self:
             return
         self[path] = _Track(path, save_memory=save_memory)
+        if self[path].min_time == None:
+            raise TrackError("%s has bad date" % path)
     
     def sort_tracks_by_time(self):
         """ Sort by value, but return keys """
