@@ -225,6 +225,6 @@ class GenericImageOutput(object):
         for track in tracklist:
             self.add_track(track)
             counter += 1
-            if counter % 10 == 0:
+            if counter % 100 == 0:
                 print("\tParsed %i/%i tracks" % (counter, total))
 
