@@ -23,10 +23,9 @@ def tracks_from_path(path):
     for dir_path, _, filenames in os.walk(path):
         gpxfiles = [filename for filename in filenames if
                 os.path.splitext(filename)[-1] == ".gpx"]
-        print("Found %s gpx files from %s files in %s" % (len(gpxfiles),
-            len(filenames), dir_path))
         for i in gpxfiles:
             tracks.add(os.path.join(dir_path, i))
+    print("Found %s gpx in %s" % (len(tracks), path))
     return tracks
 
 def mercator_adjust(lat):

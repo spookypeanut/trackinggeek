@@ -90,7 +90,7 @@ class Timelapse(GenericImageOutput):
             total = len(batches)
             for tracklist in (tracks[s:e] for (s, e) in batches):
                 counter += 1
-                if counter % 10 == 0 and total > 20:
+                if counter % 100 == 0 and total > 200:
                     print("\tCreated %s/%s frames" % (counter, total))
                 cumulative_tracks.extend(tracklist)
                 canvas = self._get_canvas(counter - 1)

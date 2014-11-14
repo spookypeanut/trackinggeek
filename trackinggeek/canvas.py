@@ -170,6 +170,6 @@ class Canvas(object):
         print("Drawing %s tracks" % total)
         for path in paths:
             counter += 1
-            if counter % 10 == 0 and total > 20:
+            if counter % 100 == 0:
                 print("\tDrawn %s of %s" % (counter, total))
             self._draw_track(tl[path])
