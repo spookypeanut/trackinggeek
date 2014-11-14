@@ -74,7 +74,9 @@ class Timelapse(GenericImageOutput):
             return
         tl = TrackLibrary()
         # TODO: We might want to do some cleverer sorting
-        tracks = tl.sort_tracks_by_time()
+        print("Sorting tracks by time...")
+        tracks = [t for t in tl.sort_tracks_by_time() if t in self.tracks]
+        print("Sorted")
         self.frames = []
         if self.timelapse_unit == "track":
             batchsize = self.units_per_frame
