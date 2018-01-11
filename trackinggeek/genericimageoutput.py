@@ -137,7 +137,7 @@ class GenericImageOutput(object):
 
     def add_track(self, path):
         tl = TrackLibrary()
-        tl.add_track(path)
+        tl.add_track(path, save_memory=self.config.savememory())
         if self.max_latitude:
             if tl[path].min_latitude > self.max_latitude or \
                     tl[path].max_latitude < self.min_latitude or \
