@@ -132,10 +132,13 @@ class TrackLibrary(dict):
     def add_track(self, path, save_memory=False):
         if path in self:
             return
-        self[path] = _Track(path, save_memory=save_memory)
-        if self[path].min_time == None:
-            raise TrackError("%s has bad date" % path)
-    
+        try:
+            self[path] = _Track(path, save_memory=save_memory)
+            if self[path].min_time is None:
+                raise TrackError("%s has bad date" % path)
+        except Exception as e:
+            print("Error reading %s: %s" % (path, e))
+
     def sort_tracks_by_time(self):
         """ Sort by value, but return keys """
         return [item[0] for item in sorted(self.items(),
