@@ -214,7 +214,7 @@ class Config(ConfigParser):
             value = self._generic_single_getter("input", "savememory",
                                                 override)
         except ConfigError:
-            return False
+            return True
         return stringtobool(value)
 
     def get_min_resolution(self, override=None):
