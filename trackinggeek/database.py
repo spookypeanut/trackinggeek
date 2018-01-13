@@ -1,13 +1,16 @@
 import os
-import sys
 import sqlite3
 from datetime import date, datetime, timedelta
-from edgydata.constants import POWER_TYPES
-from edgydata.data import Site, PowerPeriod
-from edgydata.backend.abstract import Abstract as AbstractBE
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", timedelta: "INTEGER"}
+
+_TRACK_TABLE = {"path": "STRING", "length": "FLOAT", "sha1": "STRING",
+                "latitude_min": "FLOAT", "latitude_max": "FLOAT",
+                "longitude_min": "FLOAT", "longitude_max": "FLOAT",
+                "speed_min": "FLOAT", "speed_max": "FLOAT",
+                "time_min": "INTEGER", "time_max": "INTEGER",
+                "elevation_min": "FLOAT", "elevation_max": "FLOAT"}
 
 
 def _date_to_int(mydate):
@@ -49,6 +52,8 @@ def _check(mystr):
     """ Ensure a string isn't trying to inject any dodgy SQL """
     # Although the input strings are all self-generated atm, this could
     # change in future
+    if not isinstance(mystr, str):
+        return [_check(s) for s in mystr]
     if mystr != mystr.translate(None, ")(][;,"):
         raise RuntimeError("Input '%s' looks dodgy to me" % mystr)
     return mystr
@@ -56,20 +61,15 @@ def _check(mystr):
 
 def get_db_path():
     """ Get the file path to the sqlite database """
-    return os.path.join(os.environ["HOME"], "edgydata.db")
+    return os.path.join(os.environ["HOME"], "tracklibrary.db")
 
 
-class Local(AbstractBE):
-    """ A local mirror of the solar power data, stored in a sqlite database.
-    The intention is that the extraction API is the same as
-    `edgydata.db.remote.Remote`, but there isn't any benefit to using
-    inheritance here.
-    """
-    site_table = "site"
-    power_table = "power"
+class TrackLibraryDB(object):
+    """ Information about all the tracks, stored in an sqlite database """
+    global_table = "global"
+    track_table = "power"
 
     def __init__(self, path=None, debug=True):
-        AbstractBE.__init__(self, debug=debug)
         # If we get given a path, use it, but we can make up our own
         if path is None:
             self._dbpath = get_db_path()
@@ -110,59 +110,50 @@ class Local(AbstractBE):
         else:
             self.warning("No database present at %s" % self._dbpath)
 
-    def _create_site_table(self):
-        table_name = _check(self.site_table)
-
-        columns = []
-        # We need to make sure we get the order correct
-        for myattr in self._get_site_columns():
-            mytype = Site.attr_types()[myattr]
-            columns.append("%s %s" % (myattr, _TYPE_LOOKUP[mytype]))
+    def _create_global_table(self, library_dir=None):
+        table_name = _check(self.global_table)
+        columns = ["library_dir STRING"]
         sql = ["CREATE TABLE %s (" % table_name,
                ",\n".join(columns),
-               ", PRIMARY KEY (site_id))"]
+               ");"]
         return self._execute("\n".join(sql))
 
-    def _create_power_table(self):
+    def _create_track_table(self):
         columns = []
-        for col in sorted(POWER_TYPES):
-            columns.append("%s FLOAT" % _check(col))
+        for column_tuple in sorted(_TRACK_TABLE.items()):
+            columns.append("%s %s" % _check(column_tuple))
 
         sql = """ CREATE TABLE %s (
-                    site_id INTEGER,
-                    start_time INTEGER,
-                    duration INTEGER,
-                    %s,
-                    PRIMARY KEY (site_id, start_time),
-                    FOREIGN KEY (site_id) REFERENCES %s (site_id)
-            );""" % (_check(self.power_table), ",\n".join(columns),
-                     _check(self.site_table))
+                    %s
+            );""" % (self.track_table, ",\n".join(columns))
         return self._execute(sql)
 
     def create(self):
         try:
             assert not self.is_present()
-            self._create_site_table()
-            self._create_power_table()
+            self._create_global_table()
+            self._create_track_table()
         except sqlite3.ProgrammingError:
             # If we've just destroyed, we need to re-connect before
             # recreating
             self._connect_db()
             self.create()
 
-    def add_site(self, site):
+    def add_track(self, track):
         results = []
-        for key in self._get_site_columns():
-            value = getattr(site, key)
+        for column in sorted(_TRACK_TABLE):
+            value = getattr(track, column)
             if value.__class__ in _CONVERTER:
                 results.append(_CONVERTER[value.__class__][0](value))
             else:
                 results.append(value)
-        sql = "INSERT INTO %s VALUES (?, ?, ?, ?, ?)"
-        sql = sql % _check(self.site_table)
+        question_marks = ", ".join("?" * len(results))
+        sql = "INSERT INTO %s VALUES (%s)"
+        sql = sql % (_check(self.site_table), question_marks)
         return self._execute(sql, results)
 
-    def get_site(self, site_id=None):
+    """
+    def get_track(self, path=None):
         sql = "SELECT * FROM %s WHERE site_id = ?"
         sql = sql % _check(self.site_table)
         self._execute(sql, site_id)
@@ -179,67 +170,13 @@ class Local(AbstractBE):
         tmp_dict["end_date"] = _int_to_date(tmp_dict["end_date"])
         return Site(**tmp_dict)
 
-    def get_site_ids(self):
-        sql = "SELECT DISTINCT(site_id) FROM %s"
-        sql = sql % _check(self.site_table)
-        self._execute(sql)
-        raw_tuples = self._cursor.fetchall()
-        return set([i[0] for i in raw_tuples])
-
     @classmethod
     def _get_site_columns(cls):
         return Site.list_attrs()
+"""
 
-    @classmethod
-    def _get_power_columns(cls):
-        results = ["site_id", "start_time", "duration"]
-        results.extend(sorted(POWER_TYPES))
-        return results
-
-    def _has_power(self, power):
-        if self.get_power(site_id=power.site_id, start=power.start_time,
-                          end=power.start_time):
-            return True
-        return False
-
-    def add_power(self, power):
-        # TODO: do all rows in one SQL query
-        for eachpower in power:
-            if self._has_power(eachpower):
-                self.warning("%s skipped as already present" % eachpower)
-                continue
-            results = [eachpower.site_id,
-                       _datetime_to_int(eachpower.start_time),
-                       _timedelta_to_int(eachpower.duration)]
-            for col in sorted(POWER_TYPES):
-                value = getattr(eachpower, col)
-                results.append(value)
-            sql = "INSERT INTO %s VALUES (?, ?, ?, %s)"
-            more_args = ", ".join(["?"] * len(POWER_TYPES))
-            sql = sql % (_check(self.power_table), more_args)
-            self._execute(sql, results)
-
-    def get_power(self, site_id=None, start=None, end=None):
-        if start is None:
-            start = 0
-        else:
-            start = _datetime_to_int(start)
-        if end is None:
-            end = sys.maxint
-        else:
-            end = _datetime_to_int(end)
-        sql = "SELECT * FROM %s WHERE start_time >= %s AND start_time <= %s"
-        sql = sql % (_check(self.power_table), start, end)
-        self._execute(sql)
-        raw_tuples = self._cursor.fetchall()
-        return_set = set()
-        columns = self._get_power_columns()
-        for each_tuple in raw_tuples:
-            tmp_dict = dict(zip(columns, each_tuple))
-            tmp_dict["start_time"] = _int_to_datetime(tmp_dict["start_time"])
-            tmp_dict["duration"] = _int_to_timedelta(tmp_dict["duration"])
-            return_set.add(PowerPeriod(**tmp_dict))
-        return return_set
+    def _has_track(self, power):
+        raise NotImplementedError
 
     def _get_min_time(self, site_id=None):
         sql = "SELECT MIN(start_time) FROM %s" % _check(self.power_table)
