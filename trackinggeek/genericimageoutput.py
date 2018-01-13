@@ -56,6 +56,8 @@ class GenericImageOutput(object):
             self.min_speed = None
             self.max_speed = None
 
+        self.track_library = TrackLibrary()
+
     def draw(self):
         raise NotImplementedError
 
@@ -120,23 +122,22 @@ class GenericImageOutput(object):
                 self.config.linewidth_is_constant():
             print("Speed detection not required")
             return
-        tl = TrackLibrary()
         currmin = None
         currmax = None
         print("Detecting min & max speed (%s tracks)" % len(self.tracks))
         for path in self.tracks:
             if not currmin:
-                currmin = tl[path].min_speed
-                currmax = tl[path].max_speed
+                currmin = self.track_library[path].min_speed
+                currmax = self.track_library[path].max_speed
                 continue
-            currmin = min(currmin, tl[path].min_speed)
-            currmax = max(currmax, tl[path].max_speed)
+            currmin = min(currmin, self.track_library[path].min_speed)
+            currmax = max(currmax, self.track_library[path].max_speed)
         self.min_speed = currmin
         self.max_speed = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_track(self, path):
-        tl = TrackLibrary()
+        tl = self.track_library
         tl.add_track(path, save_memory=self.config.savememory())
         if self.max_latitude:
             if tl[path].min_latitude > self.max_latitude or \
@@ -202,7 +203,7 @@ class GenericImageOutput(object):
                 self.config.linewidth_is_constant():
             print("Elevation detection not required")
             return
-        tl = TrackLibrary()
+        tl = self.track_library
         currmin = None
         currmax = None
         print("Detecting min & max elevation (%s tracks)" % len(self.tracks))
