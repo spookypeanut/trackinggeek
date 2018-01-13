@@ -1,16 +1,16 @@
 # Tracking Geek: A tool for visualizing swathes of gpx files at once
 # Copyright (C) 2012, Henry Bush
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -42,14 +42,14 @@ class GenericImageOutput(object):
         self.pixel_dimensions = pixel_dimensions
         self.tracks = []
 
-        # TODO: Have these settable in the config 
+        # TODO: Have these settable in the config
         if elevation_range:
             self.min_elevation, self.max_elevation = elevation_range
         else:
             self.min_elevation = None
             self.max_elevation = None
 
-        # TODO: Have these settable in the config 
+        # TODO: Have these settable in the config
         if speed_range:
             self.min_speed, self.max_speed = speed_range
         else:
@@ -149,10 +149,10 @@ class GenericImageOutput(object):
         max_date = self.config.get_max_date()
         if min_date or max_date:
             if min_date and tl[path].max_date < min_date:
-                #print("Before the specified time range")
+                # print("Before the specified time range")
                 return
             if max_date and tl[path].min_date > max_date:
-                #print("After the specified time range")
+                # print("After the specified time range")
                 return
 
         # At this point we know the track is one that we want
@@ -227,4 +227,3 @@ class GenericImageOutput(object):
             counter += 1
             if counter % 100 == 0:
                 print("\tParsed %i/%i tracks" % (counter, total))
-
