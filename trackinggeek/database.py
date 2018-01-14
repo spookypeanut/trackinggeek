@@ -77,6 +77,11 @@ class TrackLibraryDB(object):
             self._dbpath = path
         self._connect_db()
 
+    def debug(self, msg):
+        # The original parent class of the class this was copied from
+        # had a debug method
+        print(msg)
+
     def _connect_db(self):
         self._conn = sqlite3.connect(self._dbpath)
         self._cursor = self._conn.cursor()
@@ -112,10 +117,13 @@ class TrackLibraryDB(object):
 
     def _create_global_table(self, library_dir=None):
         table_name = _check(self.global_table)
-        columns = ["library_dir STRING"]
+        lib_dir = _check(library_dir)
+        columns = ["parameter STRING", "value STRING"]
         sql = ["CREATE TABLE %s (" % table_name,
                ",\n".join(columns),
-               ");"]
+               ");",
+               "INSERT INTO %s (" % table_name,
+               "'library_dir', '%s');" % lib_dir]
         return self._execute("\n".join(sql))
 
     def _create_track_table(self):
