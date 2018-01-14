@@ -49,7 +49,11 @@ _CONVERTER = {date: (_date_to_int, _int_to_date),
 
 
 def _check(mystr):
-    """ Ensure a string isn't trying to inject any dodgy SQL """
+    """ Ensure a string isn't trying to inject any dodgy SQL.
+
+    Note that though this also accepts any iterable of strings as input, if
+    given one it always outputs a list
+    """
     # Although the input strings are all self-generated atm, this could
     # change in future
     if not isinstance(mystr, str):
@@ -59,28 +63,39 @@ def _check(mystr):
     return mystr
 
 
-def get_db_path():
+def get_library_dir():
     """ Get the file path to the sqlite database """
-    return os.path.join(os.environ["HOME"], "tracklibrary.db")
+    return os.path.join(os.environ["HOME"], "tracklibrary")
 
 
 class TrackLibraryDB(object):
     """ Information about all the tracks, stored in an sqlite database """
     global_table = "global"
-    track_table = "power"
+    track_table = "track"
 
-    def __init__(self, path=None, debug=True):
+    def __init__(self, library_dir=None, db_path=None, debug=True):
         # If we get given a path, use it, but we can make up our own
-        if path is None:
-            self._dbpath = get_db_path()
+        if library_dir is None:
+            self.library_dir = get_library_dir()
         else:
-            self._dbpath = path
+            self.library_dir = library_dir
+        try:
+            os.makedirs(self.library_dir)
+        except Exception:
+            if not os.path.isdir(self.library_dir):
+                raise
+        if db_path is None:
+            self._dbpath = os.path.join(self.library_dir, "tracklibrary.db")
+        else:
+            self._dbpath = db_path
+        self._debug = debug
         self._connect_db()
 
     def debug(self, msg):
         # The original parent class of the class this was copied from
         # had a debug method
-        print(msg)
+        if self._debug:
+            print(msg)
 
     def _connect_db(self):
         self._conn = sqlite3.connect(self._dbpath)
@@ -115,21 +130,25 @@ class TrackLibraryDB(object):
         else:
             self.warning("No database present at %s" % self._dbpath)
 
-    def _create_global_table(self, library_dir=None):
+    def _create_global_table(self):
         table_name = _check(self.global_table)
-        lib_dir = _check(library_dir)
+        lib_dir = _check(self.library_dir)
         columns = ["parameter STRING", "value STRING"]
         sql = ["CREATE TABLE %s (" % table_name,
                ",\n".join(columns),
-               ");",
-               "INSERT INTO %s (" % table_name,
-               "'library_dir', '%s');" % lib_dir]
+               ");"]
+        self._execute("\n".join(sql))
+        sql = ["INSERT INTO %s (" % table_name,
+               "'parameter', 'value') "
+               "VALUES ('library_dir', '%s');" % lib_dir]
         return self._execute("\n".join(sql))
 
     def _create_track_table(self):
         columns = []
-        for column_tuple in sorted(_TRACK_TABLE.items()):
-            columns.append("%s %s" % _check(column_tuple))
+        for name in sorted(_TRACK_TABLE):
+            name = _check(name)
+            type_ = _check(_TRACK_TABLE[name])
+            columns.append("%s %s" % (name, type_))
 
         sql = """ CREATE TABLE %s (
                     %s
@@ -183,11 +202,11 @@ class TrackLibraryDB(object):
         return Site.list_attrs()
 """
 
-    def _has_track(self, power):
+    def _has_track(self, track):
         raise NotImplementedError
 
     def _get_min_time(self, site_id=None):
-        sql = "SELECT MIN(start_time) FROM %s" % _check(self.power_table)
+        sql = "SELECT MIN(start_time) FROM %s" % _check(self.track_table)
         if site_id is not None:
             sql += " WHERE site_id == ?"
         self._execute(sql, site_id)
@@ -198,7 +217,7 @@ class TrackLibraryDB(object):
         sql = "SELECT MAX(start_time), duration FROM %s"
         if site_id is not None:
             sql += " WHERE site_id == ?"
-        sql = sql % _check(self.power_table)
+        sql = sql % _check(self.track_table)
         # Luckily, if site_id is None, variables gets passed as None
         self._execute(sql, site_id)
         start_time, duration = self._cursor.fetchone()
