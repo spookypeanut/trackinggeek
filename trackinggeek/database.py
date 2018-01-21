@@ -6,11 +6,11 @@ _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", timedelta: "INTEGER"}
 
 _TRACK_TABLE = {"path": "STRING", "length": "FLOAT", "sha1": "STRING",
-                "latitude_min": "FLOAT", "latitude_max": "FLOAT",
-                "longitude_min": "FLOAT", "longitude_max": "FLOAT",
-                "speed_min": "FLOAT", "speed_max": "FLOAT",
-                "time_min": "INTEGER", "time_max": "INTEGER",
-                "elevation_min": "FLOAT", "elevation_max": "FLOAT"}
+                "min_elevation": "FLOAT", "max_elevation": "FLOAT",
+                "min_latitude": "FLOAT", "max_latitude": "FLOAT",
+                "min_longitude": "FLOAT", "max_longitude": "FLOAT",
+                "min_speed": "FLOAT", "max_speed": "FLOAT",
+                "min_time": "INTEGER", "max_time": "INTEGER"}
 
 
 def _date_to_int(mydate):
