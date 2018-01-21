@@ -122,6 +122,20 @@ class _Track(object):
             raise AttributeError(msg)
         return getattr(self, private_attr)
 
+    @property
+    def length(self):
+        """ Get the length of the track. This gets the 3D length. To get the
+        flat length (as measured on a map), use length_2d.
+        """
+
+    @property
+    def length_2d(self):
+        return self.get_parsed().length_2d()
+
+    @property
+    def length_3d(self):
+        return self.get_parsed().length_3d()
+
 
 class TrackLibrary(dict):
     _instance = None
