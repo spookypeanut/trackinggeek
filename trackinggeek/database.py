@@ -176,7 +176,7 @@ class TrackLibraryDB(object):
                 results.append(value)
         question_marks = ", ".join("?" * len(results))
         sql = "INSERT INTO %s VALUES (%s)"
-        sql = sql % (_check(self.site_table), question_marks)
+        sql = sql % (_check(self.track_table), question_marks)
         return self._execute(sql, results)
 
     """

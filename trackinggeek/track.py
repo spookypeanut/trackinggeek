@@ -150,7 +150,7 @@ class _Track(object):
                 data = f.read(BUF_SIZE)
                 if not data:
                     break
-            self._sha1.update(data)
+                self._sha1.update(data)
         return self._sha1.hexdigest()
 
 
