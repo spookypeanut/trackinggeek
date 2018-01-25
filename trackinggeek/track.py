@@ -16,6 +16,10 @@
 
 import gpxpy
 import os.path
+import hashlib
+
+BUF_SIZE = 65536
+
 
 class TrackError(IOError):
     pass
@@ -135,6 +139,20 @@ class _Track(object):
     @property
     def length_3d(self):
         return self.get_parsed().length_3d()
+
+    @property
+    def sha1(self):
+        if hasattr(self, "_sha1"):
+            return self._sha1.hexdigest()
+        self._sha1 = hashlib.sha1()
+        with open(self.path, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                if not data:
+                    break
+            self._sha1.update(data)
+        return self._sha1.hexdigest()
+
 
 
 class TrackLibrary(dict):
