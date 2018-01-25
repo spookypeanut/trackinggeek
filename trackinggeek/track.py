@@ -24,6 +24,7 @@ BUF_SIZE = 65536
 class TrackError(IOError):
     pass
 
+
 class _Track(object):
     def __init__(self, path, save_memory=False):
         self.path = path
@@ -59,10 +60,9 @@ class _Track(object):
     def _get_bounds(self):
         parsed = self.get_parsed()
         self._min_latitude, self._max_latitude, \
-                self._min_longitude, self._max_longitude = \
-                parsed.get_bounds()
+            self._min_longitude, self._max_longitude = parsed.get_bounds()
         self._min_elevation, self._max_elevation = \
-                parsed.get_elevation_extremes()
+            parsed.get_elevation_extremes()
         self._min_time, self._max_time = parsed.get_time_bounds()
         self._min_speed = 0
         self._max_speed = parsed.get_moving_data().max_speed
