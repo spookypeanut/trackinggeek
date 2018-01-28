@@ -127,6 +127,8 @@ class TrackLibraryDB(object):
         if self.is_present():
             self._conn.close()
             os.remove(self._dbpath)
+            # Reconnect, so we can recreate
+            self._connect_db()
         else:
             self.warning("No database present at %s" % self._dbpath)
 
@@ -156,15 +158,9 @@ class TrackLibraryDB(object):
         return self._execute(sql)
 
     def create(self):
-        try:
-            assert not self.is_present()
-            self._create_global_table()
-            self._create_track_table()
-        except sqlite3.ProgrammingError:
-            # If we've just destroyed, we need to re-connect before
-            # recreating
-            self._connect_db()
-            self.create()
+        assert not self.is_present()
+        self._create_global_table()
+        self._create_track_table()
 
     def add_track(self, track):
         results = []
