@@ -4,14 +4,15 @@ from datetime import date, datetime, timedelta
 from trackinggeek.track import Track, TrackError
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
-                date: "INTEGER", timedelta: "INTEGER"}
+                date: "INTEGER", timedelta: "INTEGER", bool: "BOOLEAN"}
 
 _TRACK_TABLE = {"path": "STRING", "length": "FLOAT", "sha1": "STRING",
                 "min_elevation": "FLOAT", "max_elevation": "FLOAT",
                 "min_latitude": "FLOAT", "max_latitude": "FLOAT",
                 "min_longitude": "FLOAT", "max_longitude": "FLOAT",
                 "min_speed": "FLOAT", "max_speed": "FLOAT",
-                "min_time": "INTEGER", "max_time": "INTEGER"}
+                "min_time": "INTEGER", "max_time": "INTEGER",
+                "stored_in_vault": "BOOLEAN"}
 
 
 def _date_to_int(mydate):
@@ -74,16 +75,24 @@ class TrackLibraryDB(object):
     global_table = "global"
     track_table = "track"
 
-    def __init__(self, library_dir=None, db_path=None, debug=True):
+    def __init__(self, library_dir=None, db_path=None, vault_dir=None,
+                 debug=True):
         # If we get given a path, use it, but we can make up our own
         if library_dir is None:
             self.library_dir = get_library_dir()
         else:
             self.library_dir = library_dir
+        if vault_dir is None:
+            self.vault_dir = os.path.join(self.library_dir, "vault")
+        else:
+            self.vault_dir = vault_dir
         try:
             os.makedirs(self.library_dir)
+            os.makedirs(self.vault_dir)
         except Exception:
             if not os.path.isdir(self.library_dir):
+                raise
+            if not os.path.isdir(self.vault_dir):
                 raise
         if db_path is None:
             self._dbpath = os.path.join(self.library_dir, "tracklibrary.db")
@@ -166,6 +175,9 @@ class TrackLibraryDB(object):
     def add_track(self, track):
         results = []
         for column in sorted(_TRACK_TABLE):
+            if column == "stored_in_vault":
+                results.append(False)
+                continue
             value = getattr(track, column)
             if value.__class__ in _CONVERTER:
                 results.append(_CONVERTER[value.__class__][0](value))
@@ -174,7 +186,25 @@ class TrackLibraryDB(object):
         question_marks = ", ".join("?" * len(results))
         sql = "INSERT INTO %s VALUES (%s)"
         sql = sql % (_check(self.track_table), question_marks)
-        return self._execute(sql, results)
+        result = self._execute(sql, results)
+        self.copy_track_to_vault(track)
+        if not self.check_vault(track):
+            raise IOError("Failed to store track %s in vault" % track.path)
+        # TODO: Check there's only one result
+        sql = "UPDATE %s SET stored_in_vault = true WHERE sha1 == '%s'"
+        sql = sql % (_check(self.track_table), _check(track.sha1))
+        return self._execute(sql)
+
+    def copy_track_to_vault(self, track):
+        """ Copy the given track into the vault of the track library """
+        raise NotImplementedError
+
+    def check_vault(self, track):
+        """ Check that the file for the given track is in the vault """
+        raise NotImplementedError
+
+    def has_track(self, track):
+        raise NotImplementedError
 
     """
     def get_track(self, path=None):
@@ -198,9 +228,6 @@ class TrackLibraryDB(object):
     def _get_site_columns(cls):
         return Site.list_attrs()
 """
-
-    def _has_track(self, track):
-        raise NotImplementedError
 
 
 class OldTrackLibrary(dict):
