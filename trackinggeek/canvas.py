@@ -1,16 +1,16 @@
 # Tracking Geek: A tool for visualizing swathes of gpx files at once
 # Copyright (C) 2012, Henry Bush
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -19,7 +19,8 @@ from point import Point
 from trackinggeek.colour import DEFAULT_COLOUR, DEFAULT_PALETTE
 from trackinggeek.util import mercator_adjust
 from trackinggeek.config import ConfigError
-from trackinggeek.track import TrackLibrary
+from trackinggeek.tracklibrary import OldTrackLibrary as TrackLibrary
+
 
 class Canvas(object):
     """ An object to draw our tracks on, and output the resulting image
@@ -110,7 +111,7 @@ class Canvas(object):
                 self.ctx.stroke()
 
     def _get_colour(self, speed, elevation):
-        lw_type = self.config.get_colour_type() 
+        lw_type = self.config.get_colour_type()
         if lw_type == "constant":
             return(self.config.get_colour())
         try:
@@ -135,9 +136,9 @@ class Canvas(object):
                        (self.max_speed - self.min_speed)
             return palette.interpolate(fraction)
         raise NotImplementedError
-            
+
     def _get_linewidth(self, speed, elevation):
-        lw_type = self.config.get_linewidth_type() 
+        lw_type = self.config.get_linewidth_type()
         if lw_type == "constant":
             return(self.config.get_linewidth())
         lw_min = self.config.get_linewidth_min()

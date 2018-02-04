@@ -14,10 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from trackinggeek.track import TrackLibrary
+from trackinggeek.tracklibrary import OldTrackLibrary as TrackLibrary
 from trackinggeek.util import mercator_adjust, tracks_from_path
 
 DEFAULT_SIZE = 1024
+
 
 class GenericImageOutput(object):
     def __init__(self, latitude_range=None, longitude_range=None,

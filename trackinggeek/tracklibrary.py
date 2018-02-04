@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from datetime import date, datetime, timedelta
+from trackinggeek.track import Track, TrackError
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", timedelta: "INTEGER"}
@@ -200,3 +201,27 @@ class TrackLibraryDB(object):
 
     def _has_track(self, track):
         raise NotImplementedError
+
+
+class OldTrackLibrary(dict):
+    _instance = None
+
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(OldTrackLibrary, cls).__new__(cls)
+        return cls._instance
+
+    def add_track(self, path, save_memory=False):
+        if path in self:
+            return
+        try:
+            self[path] = Track(path, save_memory=save_memory)
+            if self[path].min_time is None:
+                raise TrackError("%s has bad date" % path)
+        except Exception as e:
+            print("Error reading %s: %s" % (path, e))
+
+    def sort_tracks_by_time(self):
+        """ Sort by value, but return keys """
+        return [item[0] for item in sorted(self.items(),
+                                           key=lambda t: t[1].min_time)]

@@ -25,7 +25,7 @@ class TrackError(IOError):
     pass
 
 
-class _Track(object):
+class Track(object):
     def __init__(self, path, save_memory=False):
         self.path = path
         if not os.path.exists(path):
@@ -152,28 +152,3 @@ class _Track(object):
                     break
                 self._sha1.update(data)
         return self._sha1.hexdigest()
-
-
-
-class TrackLibrary(dict):
-    _instance = None
-
-    def __new__(cls):
-        if not cls._instance:
-            cls._instance = super(TrackLibrary, cls).__new__(cls)
-        return cls._instance
-
-    def add_track(self, path, save_memory=False):
-        if path in self:
-            return
-        try:
-            self[path] = _Track(path, save_memory=save_memory)
-            if self[path].min_time is None:
-                raise TrackError("%s has bad date" % path)
-        except Exception as e:
-            print("Error reading %s: %s" % (path, e))
-
-    def sort_tracks_by_time(self):
-        """ Sort by value, but return keys """
-        return [item[0] for item in sorted(self.items(),
-                                           key=lambda t: t[1].min_time)]
