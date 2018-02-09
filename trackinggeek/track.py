@@ -98,6 +98,7 @@ class Track(object):
         """ Get the length of the track. This gets the 3D length. To get the
         flat length (as measured on a map), use length_2d.
         """
+        return self.length_3d
 
     @property
     def length_2d(self):
