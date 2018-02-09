@@ -34,7 +34,7 @@ class Track(object):
         self.save_memory = save_memory
 
     def __hash__(self):
-        return hash(self.path)
+        return self.sha1
 
     def get_parsed(self):
         if self.save_memory:
