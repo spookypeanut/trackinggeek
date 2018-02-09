@@ -69,45 +69,21 @@ class Track(object):
 
     # Is there a way to create these procedurally, just from a list?
 
-    @property
-    def min_latitude(self):
-        return self._get_extreme("min_latitude")
-
-    @property
-    def max_latitude(self):
-        return self._get_extreme("max_latitude")
-
-    @property
-    def min_longitude(self):
-        return self._get_extreme("min_longitude")
-
-    @property
-    def max_longitude(self):
-        return self._get_extreme("max_longitude")
-
-    @property
-    def min_elevation(self):
-        return self._get_extreme("min_elevation")
-
-    @property
-    def max_elevation(self):
-        return self._get_extreme("max_elevation")
-
-    @property
-    def min_time(self):
-        return self._get_extreme("min_time")
-
-    @property
-    def max_time(self):
-        return self._get_extreme("max_time")
-
-    @property
-    def min_speed(self):
-        return self._get_extreme("min_speed")
-
-    @property
-    def max_speed(self):
-        return self._get_extreme("max_speed")
+    def __getattr__(self, name):
+        valid_attrs = ["min_latitude", "max_latitude",
+                       "min_longitude", "max_longitude",
+                       "min_elevation", "max_elevation",
+                       "min_time", "max_time",
+                       "min_speed", "max_speed"]
+        if name in valid_attrs:
+            private_attr = "_%s" % name
+            if not hasattr(self, private_attr):
+                self._get_bounds()
+            if not hasattr(self, private_attr):
+                msg = "Internal error: bound '%s' is still not present" % name
+                raise AttributeError(msg)
+            return getattr(self, private_attr)
+        return object.__getattr__(name)
 
     @property
     def min_date(self):
@@ -116,15 +92,6 @@ class Track(object):
     @property
     def max_date(self):
         return self.max_time.date()
-
-    def _get_extreme(self, name):
-        private_attr = "_%s" % name
-        if not hasattr(self, private_attr):
-            self._get_bounds()
-        if not hasattr(self, private_attr):
-            msg = "Internal error: bound '%s' is still not present" % name
-            raise AttributeError(msg)
-        return getattr(self, private_attr)
 
     @property
     def length(self):
