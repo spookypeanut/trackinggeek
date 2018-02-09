@@ -57,7 +57,7 @@ class Track(object):
             segments.extend(track.segments)
         return segments
 
-    def _get_bounds(self):
+    def _extract_stats_from_gpx(self):
         parsed = self.get_parsed()
         self._min_latitude, self._max_latitude, \
             self._min_longitude, self._max_longitude = parsed.get_bounds()
@@ -66,8 +66,8 @@ class Track(object):
         self._min_time, self._max_time = parsed.get_time_bounds()
         self._min_speed = 0
         self._max_speed = parsed.get_moving_data().max_speed
-
-    # Is there a way to create these procedurally, just from a list?
+        self._length_2d = parsed.length_2d()
+        self._length_3d = parsed.length_3d()
 
     def __getattr__(self, name):
         valid_attrs = ["min_latitude", "max_latitude",
@@ -78,7 +78,10 @@ class Track(object):
         if name in valid_attrs:
             private_attr = "_%s" % name
             if not hasattr(self, private_attr):
-                self._get_bounds()
+                # Note that we *should* never have to do this for a
+                # TrackDB, but you never know.
+                # TODO: Maybe put a warning in?
+                self._extract_stats_from_gpx()
             if not hasattr(self, private_attr):
                 msg = "Internal error: bound '%s' is still not present" % name
                 raise AttributeError(msg)
@@ -99,14 +102,6 @@ class Track(object):
         flat length (as measured on a map), use length_2d.
         """
         return self.length_3d
-
-    @property
-    def length_2d(self):
-        return self.get_parsed().length_2d()
-
-    @property
-    def length_3d(self):
-        return self.get_parsed().length_3d()
 
     @property
     def sha1(self):
