@@ -21,6 +21,18 @@ import hashlib
 BUF_SIZE = 65536
 
 
+def get_track(path):
+    """ If the track is in the database, return a TrackDB. If not, return a
+    TrackPath.
+    """
+    raise NotImplementedError
+
+
+def get_track_from_db(hash):
+    """ Get a track from the database using it's sha1 hash """
+    raise NotImplementedError
+
+
 class TrackError(IOError):
     pass
 
