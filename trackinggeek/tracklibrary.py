@@ -89,10 +89,12 @@ class TrackLibraryDB(object):
             self.vault_dir = vault_dir
         try:
             os.makedirs(self.library_dir)
-            os.makedirs(self.vault_dir)
         except Exception:
             if not os.path.isdir(self.library_dir):
                 raise
+        try:
+            os.makedirs(self.vault_dir)
+        except Exception:
             if not os.path.isdir(self.vault_dir):
                 raise
         if db_path is None:
