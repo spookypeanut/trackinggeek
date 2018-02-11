@@ -209,23 +209,23 @@ class TrackLibraryDB(object):
     def has_track(self, track):
         raise NotImplementedError
 
-    """
-    def get_track(self, path=None):
-        sql = "SELECT * FROM %s WHERE site_id = ?"
-        sql = sql % _check(self.site_table)
-        self._execute(sql, site_id)
+    def get_track(self, sha1):
+        sql = "SELECT * FROM %s WHERE sha1 = ?"
+        sql = sql % _check(self.track_table)
+        self._execute(sql, sha1)
         raw_tuples = self._cursor.fetchall()
         if len(raw_tuples) == 0:
-            raise ValueError("Site %s not found in local database" % site_id)
+            raise ValueError("Track %s not found in local database" % sha1)
         if len(raw_tuples) != 1:
-            # This should never happen, since site_id is the primary key
-            raise ValueError("Some seriously weird shit happened")
+            # This should never happen, since sha1 should be unique
+            raise ValueError("Multiple tracks found with hash %s" % sha1)
         raw_tuple = list(raw_tuples)[0]
-        columns = self._get_site_columns()
+        columns = _TRACK_TABLE.keys()
         tmp_dict = dict(zip(columns, raw_tuple))
         tmp_dict["start_date"] = _int_to_date(tmp_dict["start_date"])
         tmp_dict["end_date"] = _int_to_date(tmp_dict["end_date"])
-        return Site(**tmp_dict)
+        return tmp_dict
+    """
 
     @classmethod
     def _get_site_columns(cls):
