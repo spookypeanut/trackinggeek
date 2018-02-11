@@ -220,10 +220,10 @@ class TrackLibraryDB(object):
             # This should never happen, since sha1 should be unique
             raise ValueError("Multiple tracks found with hash %s" % sha1)
         raw_tuple = list(raw_tuples)[0]
-        columns = _TRACK_TABLE.keys()
+        columns = sorted(_TRACK_TABLE.keys())
         tmp_dict = dict(zip(columns, raw_tuple))
-        tmp_dict["start_date"] = _int_to_date(tmp_dict["start_date"])
-        tmp_dict["end_date"] = _int_to_date(tmp_dict["end_date"])
+        tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
+        tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
         return tmp_dict
     """
 
