@@ -86,7 +86,8 @@ class Track(object):
                        "min_longitude", "max_longitude",
                        "min_elevation", "max_elevation",
                        "min_time", "max_time",
-                       "min_speed", "max_speed"]
+                       "min_speed", "max_speed",
+                       "length_2d", "length_3d"]
         if name in valid_attrs:
             private_attr = "_%s" % name
             if not hasattr(self, private_attr):
@@ -98,7 +99,7 @@ class Track(object):
                 msg = "Internal error: bound '%s' is still not present" % name
                 raise AttributeError(msg)
             return getattr(self, private_attr)
-        return object.__getattr__(name)
+        raise AttributeError("No %s attribute present" % name)
 
     @property
     def min_date(self):
