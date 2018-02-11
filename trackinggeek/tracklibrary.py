@@ -6,7 +6,8 @@ from trackinggeek.track import Track, TrackError
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", timedelta: "INTEGER", bool: "BOOLEAN"}
 
-_TRACK_TABLE = {"path": "STRING", "length": "FLOAT", "sha1": "STRING",
+_TRACK_TABLE = {"path": "STRING", "sha1": "STRING",
+                "length_3d": "FLOAT", "length_2d": "FLOAT",
                 "min_elevation": "FLOAT", "max_elevation": "FLOAT",
                 "min_latitude": "FLOAT", "max_latitude": "FLOAT",
                 "min_longitude": "FLOAT", "max_longitude": "FLOAT",
