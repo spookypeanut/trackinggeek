@@ -1,19 +1,11 @@
 import os
 import sqlite3
 from datetime import date, datetime, timedelta
-from trackinggeek.track import Track, TrackError
+from trackinggeek.track import Track, TrackError, TrackDB, _TRACK_ATTRIBUTES
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
-                date: "INTEGER", timedelta: "INTEGER", bool: "BOOLEAN"}
-
-_TRACK_TABLE = {"path": "STRING", "sha1": "STRING",
-                "length_3d": "FLOAT", "length_2d": "FLOAT",
-                "min_elevation": "FLOAT", "max_elevation": "FLOAT",
-                "min_latitude": "FLOAT", "max_latitude": "FLOAT",
-                "min_longitude": "FLOAT", "max_longitude": "FLOAT",
-                "min_speed": "FLOAT", "max_speed": "FLOAT",
-                "min_time": "INTEGER", "max_time": "INTEGER",
-                "stored_in_vault": "BOOLEAN"}
+                date: "INTEGER", datetime: "INTEGER", timedelta: "INTEGER",
+                bool: "BOOLEAN"}
 
 
 def _date_to_int(mydate):
@@ -160,10 +152,11 @@ class TrackLibraryDB(object):
 
     def _create_track_table(self):
         columns = []
-        for name in sorted(_TRACK_TABLE):
+        for name in sorted(_TRACK_ATTRIBUTES):
             name = _check(name)
-            type_ = _check(_TRACK_TABLE[name])
-            columns.append("%s %s" % (name, type_))
+            type_ = _TRACK_ATTRIBUTES[name]
+            sqltype = _check(_TYPE_LOOKUP[type_])
+            columns.append("%s %s" % (name, sqltype))
 
         sql = """ CREATE TABLE %s (
                     %s
@@ -177,7 +170,7 @@ class TrackLibraryDB(object):
 
     def add_track(self, track):
         results = []
-        for column in sorted(_TRACK_TABLE):
+        for column in sorted(_TRACK_ATTRIBUTES):
             if column == "stored_in_vault":
                 results.append(False)
                 continue
@@ -220,7 +213,7 @@ class TrackLibraryDB(object):
             # This should never happen, since sha1 should be unique
             raise ValueError("Multiple tracks found with hash %s" % sha1)
         raw_tuple = list(raw_tuples)[0]
-        columns = sorted(_TRACK_TABLE.keys())
+        columns = sorted(_TRACK_ATTRIBUTES.keys())
         tmp_dict = dict(zip(columns, raw_tuple))
         tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
         tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])

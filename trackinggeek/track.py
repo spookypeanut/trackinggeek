@@ -17,8 +17,19 @@
 import gpxpy
 import os.path
 import hashlib
+from datetime import datetime
 
 BUF_SIZE = 65536
+
+
+_TRACK_ATTRIBUTES = {"path": str, "sha1": str,
+                     "length_3d": float, "length_2d": float,
+                     "min_elevation": float, "max_elevation": float,
+                     "min_latitude": float, "max_latitude": float,
+                     "min_longitude": float, "max_longitude": float,
+                     "min_speed": float, "max_speed": float,
+                     "min_time": datetime, "max_time": datetime,
+                     "stored_in_vault": bool}
 
 
 def get_track(path):
