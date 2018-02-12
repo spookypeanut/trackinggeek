@@ -63,6 +63,12 @@ def get_library_dir():
     return os.path.join(os.environ["HOME"], "tracklibrary")
 
 
+def get_relative_vault_path(track):
+    dirname = track.sha1[:3]
+    basename = "%s.gpx" % track.sha1[3:]
+    return (dirname, basename)
+
+
 class TrackLibraryDB(object):
     """ Information about all the tracks, stored in an sqlite database """
     global_table = "global"
