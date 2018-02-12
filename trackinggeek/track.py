@@ -150,9 +150,9 @@ class TrackDB(Track):
         "original_path" for that, and "path" for the actual vault path (based
         on sha1).
         """
-        # Open up the data parameter (is it a dict? that would be nice)
-        # and store its contents in private variables
-        raise NotImplementedError
+        for key, value in data.items():
+            parameter = "_%s" % key
+            setattr(self, parameter, value)
 
 
 class TrackPath(Track):

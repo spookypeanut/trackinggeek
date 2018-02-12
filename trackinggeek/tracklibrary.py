@@ -217,7 +217,7 @@ class TrackLibraryDB(object):
         tmp_dict = dict(zip(columns, raw_tuple))
         tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
         tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
-        return tmp_dict
+        return TrackDB(tmp_dict)
     """
 
     @classmethod
