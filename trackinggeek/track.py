@@ -86,12 +86,7 @@ class Track(object):
         self._length_3d = parsed.length_3d()
 
     def __getattr__(self, name):
-        valid_attrs = ["min_latitude", "max_latitude",
-                       "min_longitude", "max_longitude",
-                       "min_elevation", "max_elevation",
-                       "min_time", "max_time",
-                       "min_speed", "max_speed",
-                       "length_2d", "length_3d"]
+        valid_attrs = _TRACK_ATTRIBUTES.keys()
         if name in valid_attrs:
             private_attr = "_%s" % name
             if not hasattr(self, private_attr):
