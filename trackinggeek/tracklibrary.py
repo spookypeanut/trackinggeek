@@ -194,7 +194,7 @@ class TrackLibraryDB(object):
         if not self.check_vault(track):
             raise IOError("Failed to store track %s in vault" % track.path)
         # TODO: Check there's only one result
-        sql = "UPDATE %s SET stored_in_vault = true WHERE sha1 == '%s'"
+        sql = "UPDATE %s SET stored_in_vault = 1 WHERE sha1 == '%s'"
         sql = sql % (_check(self.track_table), _check(track.sha1))
         return self._execute(sql)
 
