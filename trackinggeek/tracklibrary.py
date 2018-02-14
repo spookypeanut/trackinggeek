@@ -165,7 +165,8 @@ class TrackLibraryDB(object):
             columns.append("%s %s" % (name, sqltype))
 
         sql = """ CREATE TABLE %s (
-                    %s
+                    %s,
+                    PRIMARY KEY (sha1)
             );""" % (self.track_table, ",\n".join(columns))
         return self._execute(sql)
 
