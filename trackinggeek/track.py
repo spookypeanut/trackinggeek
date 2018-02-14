@@ -154,7 +154,7 @@ class TrackPath(Track):
     def __init__(self, path, save_memory=False):
         # TODO: ability to give it a vault path, and it detect it as such
         if not os.path.exists(path):
-            msg = "The gpx file '%s' does not exist"
+            msg = "The gpx file '%s' does not exist" % path
             raise IOError(msg)
         self.save_memory = save_memory
         self.stored_in_vault = False
