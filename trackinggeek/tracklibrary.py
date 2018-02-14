@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import shutil
 from datetime import date, datetime, timedelta
 from trackinggeek.track import Track, TrackError, TrackDB, _TRACK_ATTRIBUTES
 
@@ -189,25 +190,51 @@ class TrackLibraryDB(object):
         question_marks = ", ".join("?" * len(results))
         sql = "INSERT INTO %s VALUES (%s)"
         sql = sql % (_check(self.track_table), question_marks)
-        result = self._execute(sql, results)
-        self.copy_track_to_vault(track)
+        self._execute(sql, results)
+        self.move_track_to_vault(track)
+
         if not self.check_vault(track):
             raise IOError("Failed to store track %s in vault" % track.path)
         # TODO: Check there's only one result
         sql = "UPDATE %s SET stored_in_vault = 1 WHERE sha1 == '%s'"
         sql = sql % (_check(self.track_table), _check(track.sha1))
-        return self._execute(sql)
+        self._execute(sql)
+        return self.get_track(track.sha1)
 
-    def copy_track_to_vault(self, track):
+    def get_vault_path(self, track):
+        dirname, basename = get_relative_vault_path(track)
+        return os.path.join(self.vault_dir, dirname), basename
+
+    def move_track_to_vault(self, track):
         """ Copy the given track into the vault of the track library """
-        raise NotImplementedError
+        dirname, basename = self.get_vault_path(track)
+        try:
+            os.makedirs(dirname)
+        except OSError:
+            if not os.path.isdir(dirname):
+                raise
+        destpath = os.path.join(dirname, basename)
+        if os.path.isfile(destpath):
+            raise IOError("Path %s already exists!" % destpath)
+        print("Moving %s to %s" % (track.path, destpath))
+        shutil.move(track.path, destpath)
 
     def check_vault(self, track):
         """ Check that the file for the given track is in the vault """
-        raise NotImplementedError
+        dirname, basename = self.get_vault_path(track)
+        fullpath = os.path.join(dirname, basename)
+        if not os.path.exists(fullpath):
+            return False
+        return True
 
     def has_track(self, track):
-        raise NotImplementedError
+        """ Check if the given track is in the database (not necessarily the
+        vault) """
+        try:
+            self._get_track(track.sha1, allow_multiple=True)
+        except Exception:
+            return False
+        return True
 
     def get_track(self, sha1):
         return self._get_track(sha1, allow_multiple=False)
