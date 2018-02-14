@@ -209,6 +209,9 @@ class TrackLibraryDB(object):
         raise NotImplementedError
 
     def get_track(self, sha1):
+        return self._get_track(sha1, allow_multiple=False)
+
+    def _get_track(self, sha1, allow_multiple=False):
         sql = "SELECT * FROM %s WHERE sha1 = ?"
         sql = sql % _check(self.track_table)
         self._execute(sql, sha1)
@@ -216,14 +219,20 @@ class TrackLibraryDB(object):
         if len(raw_tuples) == 0:
             raise ValueError("Track %s not found in local database" % sha1)
         if len(raw_tuples) != 1:
-            # This should never happen, since sha1 should be unique
-            raise ValueError("Multiple tracks found with hash %s" % sha1)
-        raw_tuple = list(raw_tuples)[0]
-        columns = sorted(_TRACK_ATTRIBUTES.keys())
-        tmp_dict = dict(zip(columns, raw_tuple))
-        tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
-        tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
-        return TrackDB(tmp_dict)
+            if allow_multiple is False:
+                # This should never happen, since sha1 should be unique
+                raise ValueError("Multiple tracks found with hash %s" % sha1)
+        return_list = []
+        for raw_tuple in raw_tuples:
+            columns = sorted(_TRACK_ATTRIBUTES.keys())
+            tmp_dict = dict(zip(columns, raw_tuple))
+            print(tmp_dict)
+            tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
+            tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
+            return_list.append(TrackDB(tmp_dict))
+        if allow_multiple is True:
+            return return_list
+        return return_list[0]
     """
 
     @classmethod
