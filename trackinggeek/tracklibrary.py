@@ -270,12 +270,6 @@ class TrackLibraryDB(object):
         if allow_multiple is True:
             return return_list
         return return_list[0]
-    """
-
-    @classmethod
-    def _get_site_columns(cls):
-        return Site.list_attrs()
-"""
 
 
 class OldTrackLibrary(dict):
