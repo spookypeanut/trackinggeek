@@ -3,6 +3,7 @@ import sqlite3
 import shutil
 from datetime import date, datetime, timedelta
 from trackinggeek.track import Track, TrackError, TrackDB, _TRACK_ATTRIBUTES
+from trackinggeek.util import tracks_from_path
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", datetime: "INTEGER", timedelta: "INTEGER",
@@ -175,6 +176,14 @@ class TrackLibraryDB(object):
         assert not self.is_present()
         self._create_global_table()
         self._create_track_table()
+
+    def add_track_directory(self, path):
+        tracks = tracks_from_path(path)
+        print("Adding %s tracks to database")
+        for counter, eachtrack in enumerate(tracks):
+            if counter and counter % 20 == 0:
+                print("Added %s/%s tracks" % (counter, len(tracks)))
+            self.add_track(eachtrack)
 
     def add_track(self, track):
         results = []
