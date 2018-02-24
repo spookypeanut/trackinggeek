@@ -49,6 +49,9 @@ class TrackError(IOError):
 
 
 class Track(object):
+    def __init__(self):
+        raise NotImplementedError("Please use the subclasses")
+
     def __hash__(self):
         return self.sha1
 
