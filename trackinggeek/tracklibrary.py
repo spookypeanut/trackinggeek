@@ -261,6 +261,13 @@ class TrackLibraryDB(object):
         return self._get_track(sha1, allow_multiple=False)
 
     def _get_track(self, sha1, allow_multiple=False):
+        """ When we only care if the track is in the database, it's "fine"* if
+        there are multiple tracks with the same sha1 in the database. That
+        should be impossible, so this is probably overkill, but I done it
+        anyway.
+
+        * Fine as in, it will break everything else, but this should work.
+        """
         sql = "SELECT * FROM %s WHERE sha1 = ?"
         sql = sql % _check(self.track_table)
         self._execute(sql, sha1)
@@ -277,6 +284,18 @@ class TrackLibraryDB(object):
         if allow_multiple is True:
             return return_list
         return return_list[0]
+
+    def get_tracks(self, **kwargs):
+        """ Each argument should be the name of an attribute of the track. The
+        value of each argument should be a range, as a tuple. E.g.
+          min_elevation = (0, 100)
+        Will narrow down searches to those tracks whose minimum elevation is
+        between 0 and 100.
+        To specify a one-ended range, use None:
+          length_3d=(None, 1000)
+        Will narrow down to all tracks that are less than 1000 long.
+        """
+        pass
 
 
 class OldTrackLibrary(dict):
