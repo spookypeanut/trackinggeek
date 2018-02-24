@@ -229,7 +229,7 @@ class TrackLibraryDB(object):
         destpath = os.path.join(dirname, basename)
         if os.path.isfile(destpath):
             raise IOError("Path %s already exists!" % destpath)
-        print("Moving %s to %s" % (track.path, destpath))
+        self._debug("Moving %s to %s" % (track.path, destpath))
         shutil.move(track.path, destpath)
 
     def check_vault(self, track):
@@ -267,7 +267,6 @@ class TrackLibraryDB(object):
         for raw_tuple in raw_tuples:
             columns = sorted(_TRACK_ATTRIBUTES.keys())
             tmp_dict = dict(zip(columns, raw_tuple))
-            print(tmp_dict)
             tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
             tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
             return_list.append(TrackDB(tmp_dict))
