@@ -77,7 +77,7 @@ class TrackLibraryDB(object):
     track_table = "track"
 
     def __init__(self, library_dir=None, db_path=None, vault_dir=None,
-                 debug=True):
+                 debug=False):
         # If we get given a path, use it, but we can make up our own
         if library_dir is None:
             self.library_dir = get_library_dir()
