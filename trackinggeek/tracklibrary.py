@@ -71,6 +71,14 @@ def get_relative_vault_path(track):
     return (dirname, basename)
 
 
+def _convert_to_track_object(self, raw_tuple):
+    columns = sorted(_TRACK_ATTRIBUTES.keys())
+    tmp_dict = dict(zip(columns, raw_tuple))
+    tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
+    tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
+    return TrackDB(tmp_dict)
+
+
 class TrackLibraryDB(object):
     """ Information about all the tracks, stored in an sqlite database """
     global_table = "global"
@@ -265,11 +273,7 @@ class TrackLibraryDB(object):
                 raise ValueError("Multiple tracks found with hash %s" % sha1)
         return_list = []
         for raw_tuple in raw_tuples:
-            columns = sorted(_TRACK_ATTRIBUTES.keys())
-            tmp_dict = dict(zip(columns, raw_tuple))
-            tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
-            tmp_dict["max_time"] = _int_to_date(tmp_dict["max_time"])
-            return_list.append(TrackDB(tmp_dict))
+            return_list.append(_convert_to_track_object(raw_tuple))
         if allow_multiple is True:
             return return_list
         return return_list[0]
