@@ -2,7 +2,7 @@ import os
 import sqlite3
 import shutil
 from datetime import date, datetime, timedelta
-from trackinggeek.track import Track, TrackError, TrackDB, _TRACK_ATTRIBUTES
+from trackinggeek.track import TrackPath, TrackError, TrackDB, _TRACK_ATTRIBUTES
 from trackinggeek.util import tracks_from_path
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
@@ -179,11 +179,15 @@ class TrackLibraryDB(object):
 
     def add_track_directory(self, path):
         tracks = tracks_from_path(path)
-        print("Adding %s tracks to database")
+        print("Adding %s tracks to database" % len(tracks))
         for counter, eachtrack in enumerate(tracks):
             if counter and counter % 20 == 0:
                 print("Added %s/%s tracks" % (counter, len(tracks)))
-            self.add_track(eachtrack)
+            t = TrackPath(eachtrack)
+            if self.has_track(t):
+                print("Skipping %s, already in database" % eachtrack)
+                continue
+            self.add_track(t)
 
     def add_track(self, track):
         results = []
@@ -284,7 +288,7 @@ class OldTrackLibrary(dict):
         if path in self:
             return
         try:
-            self[path] = Track(path, save_memory=save_memory)
+            self[path] = TrackPath(path, save_memory=save_memory)
             if self[path].min_time is None:
                 raise TrackError("%s has bad date" % path)
         except Exception as e:
