@@ -316,7 +316,6 @@ class TrackLibraryDB(object):
         return_set = set()
         for raw_tuple in raw_tuples:
             _track_object = _convert_to_track_object(raw_tuple)
-            print(_track_object)
             return_set.add(_track_object)
         return return_set
 
