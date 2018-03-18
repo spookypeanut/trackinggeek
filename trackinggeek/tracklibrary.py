@@ -71,7 +71,7 @@ def get_relative_vault_path(track):
     return (dirname, basename)
 
 
-def _convert_to_track_object(self, raw_tuple):
+def _convert_to_track_object(raw_tuple):
     columns = sorted(_TRACK_ATTRIBUTES.keys())
     tmp_dict = dict(zip(columns, raw_tuple))
     tmp_dict["min_time"] = _int_to_date(tmp_dict["min_time"])
