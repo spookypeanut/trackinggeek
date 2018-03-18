@@ -53,7 +53,7 @@ class Track(object):
         raise NotImplementedError("Please use the subclasses")
 
     def __hash__(self):
-        return self.sha1
+        return hash(self.sha1)
 
     def get_parsed(self):
         if self.save_memory:
