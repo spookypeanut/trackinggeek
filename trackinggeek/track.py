@@ -140,7 +140,7 @@ class Track(object):
 
 
 class TrackDB(Track):
-    def __init__(self, data):
+    def __init__(self, data, save_memory=False):
         """ Instantiate a track object using the data retrieved from the
         database. Note that the "path" in the database isn't the actual path to
         the file on disk, it's now stored in the database vault. Thus we have
@@ -150,6 +150,7 @@ class TrackDB(Track):
         for key, value in data.items():
             parameter = "_%s" % key
             setattr(self, parameter, value)
+        self.save_memory = save_memory
 
 
 class TrackPath(Track):
