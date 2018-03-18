@@ -295,7 +295,30 @@ class TrackLibraryDB(object):
           length_3d=(None, 1000)
         Will narrow down to all tracks that are less than 1000 long.
         """
-        pass
+        sql = "SELECT * FROM %s" % _check(self.track_table)
+        clauses = []
+        min_template = "%s >= ?"
+        max_template = "%s <= ?"
+        for key, value in kwargs.items():
+            min_, max_ = value
+            if min_ is not None:
+                clauses.append((min_template % key, min_))
+            if max_ is not None:
+                clauses.append((max_template % key, max_))
+        print(clauses)
+        if clauses:
+            sql += " WHERE "
+            sql.extend([c[0] for c in clauses])
+            self._execute(sql, [c[1] for c in clauses])
+        else:
+            self._execute(sql)
+        raw_tuples = self._cursor.fetchall()
+        return_set = set()
+        for raw_tuple in raw_tuples:
+            _track_object = _convert_to_track_object(raw_tuple)
+            print(_track_object)
+            return_set.add(_track_object)
+        return return_set
 
 
 class OldTrackLibrary(dict):
