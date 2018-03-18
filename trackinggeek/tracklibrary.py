@@ -308,7 +308,7 @@ class TrackLibraryDB(object):
         print(clauses)
         if clauses:
             sql += " WHERE "
-            sql.extend([c[0] for c in clauses])
+            sql += " AND ".join([c[0] for c in clauses])
             self._execute(sql, [c[1] for c in clauses])
         else:
             self._execute(sql)
