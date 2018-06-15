@@ -18,7 +18,7 @@ from copy import deepcopy
 from trackinggeek.genericimageoutput import GenericImageOutput
 from trackinggeek.canvas import Canvas
 from trackinggeek.util import add_num_to_path
-from trackinggeek.tracklibrary import OldTrackLibrary as TrackLibrary
+from trackinggeek.tracklibrary import OldTrackLibrary
 
 
 class Timelapse(GenericImageOutput):
@@ -73,7 +73,7 @@ class Timelapse(GenericImageOutput):
     def _prepare_frames(self):
         if self._frames_prepared:
             return
-        tl = TrackLibrary()
+        tl = OldTrackLibrary()
         # TODO: We might want to do some cleverer sorting
         print("Sorting tracks by time...")
         tracks = [t for t in tl.sort_tracks_by_time() if t in self.tracks]
