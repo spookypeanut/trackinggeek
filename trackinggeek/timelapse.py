@@ -59,7 +59,7 @@ class Timelapse(GenericImageOutput):
             f.clear()
 
     def save_svg(self, path):
-        #self.surface.finish()
+        # self.surface.finish()
         raise NotImplementedError
 
     def _get_canvas(self, frame_number):
@@ -86,7 +86,7 @@ class Timelapse(GenericImageOutput):
             cumulative_tracks = []
             counter = 0
             print("Creating frames")
-            startnums = xrange(0, len(tracks), batchsize)
+            startnums = range(0, len(tracks), batchsize)
             # The end number should be 1 more than might be expected,
             # because of the way python list slicing works
             batches = [(s, s + batchsize) for s in startnums]
@@ -102,8 +102,9 @@ class Timelapse(GenericImageOutput):
                                          frame_number=counter-1))
         else:
             raise NotImplementedError("Don't know how to handle %s" %
-                    self.timelapse_unit)
+                                      self.timelapse_unit)
         self._frames_prepared = True
+
 
 class Frame(object):
     def __init__(self, canvas, tracks, frame_number):
