@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from trackinggeek.tracklibrary import OldTrackLibrary
-from trackinggeek.util import mercator_adjust, tracks_from_path
+from trackinggeek.tracklibrary import TrackLibraryDB
+from trackinggeek.util import mercator_adjust
 
 DEFAULT_SIZE = 1024
 
@@ -41,7 +41,6 @@ class GenericImageOutput(object):
 
         self.config = config
         self.pixel_dimensions = pixel_dimensions
-        self.tracks = []
 
         # TODO: Have these settable in the config
         if elevation_range:
@@ -56,8 +55,6 @@ class GenericImageOutput(object):
         else:
             self.min_speed = None
             self.max_speed = None
-
-        self.track_library = OldTrackLibrary()
 
     def draw(self):
         raise NotImplementedError
@@ -136,6 +133,7 @@ class GenericImageOutput(object):
         self.min_speed = currmin
         self.max_speed = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
+
 
     def add_track(self, path):
         tl = self.track_library
@@ -220,12 +218,16 @@ class GenericImageOutput(object):
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_path(self, path):
-        tracklist = tracks_from_path(path)
-        total = len(tracklist)
-        counter = 0
-        print("Parsing %i tracks" % total)
-        for track in tracklist:
-            self.add_track(track)
-            counter += 1
-            if counter % 100 == 0:
-                print("\tParsed %i/%i tracks" % (counter, total))
+        self.track_library = TrackLibraryDB(library_dir=path)
+        num_tracks = len(self.track_library.get_tracks())
+        print("Database contains %i tracks" % num_tracks)
+        self.get_refined_tracks()
+        print("Found %i tracks to use" % len(self.tracks))
+
+    def get_refined_tracks(self):
+        self.tracks = []
+        kwargs = {"min_latitude": (None, self.max_latitude),
+                  "max_latitude": (self.min_latitude, None),
+                  "min_longitude": (None, self.max_longitude),
+                  "max_longitude": (self.min_longitude, None)}
+        self.tracks = self.track_library.get_tracks(**kwargs)
