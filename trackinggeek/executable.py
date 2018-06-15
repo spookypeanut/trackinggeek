@@ -21,6 +21,7 @@ from trackinggeek.config import Config
 from trackinggeek.singleimage import SingleImage
 from trackinggeek.timelapse import Timelapse
 
+
 def OutputImage(pixel_dimensions, latitude_range, longitude_range,
                 elevation_range, speed_range, config):
     if config.do_timelapse():
@@ -31,11 +32,12 @@ def OutputImage(pixel_dimensions, latitude_range, longitude_range,
                          speed_range=speed_range,
                          config=config)
     return SingleImage(pixel_dimensions=pixel_dimensions,
-                         latitude_range=latitude_range,
-                         longitude_range=longitude_range,
-                         elevation_range=elevation_range,
-                         speed_range=speed_range,
-                         config=config)
+                       latitude_range=latitude_range,
+                       longitude_range=longitude_range,
+                       elevation_range=elevation_range,
+                       speed_range=speed_range,
+                       config=config)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -114,4 +116,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-
