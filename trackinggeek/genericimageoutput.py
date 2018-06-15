@@ -124,12 +124,13 @@ class GenericImageOutput(object):
         currmax = None
         print("Detecting min & max speed (%s tracks)" % len(self.tracks))
         for path in self.tracks:
+            print(dir(path))
             if not currmin:
-                currmin = self.track_library[path].min_speed
-                currmax = self.track_library[path].max_speed
+                currmin = path.min_speed
+                currmax = path.max_speed
                 continue
-            currmin = min(currmin, self.track_library[path].min_speed)
-            currmax = max(currmax, self.track_library[path].max_speed)
+            currmin = min(currmin, path.min_speed)
+            currmax = max(currmax, path.max_speed)
         self.min_speed = currmin
         self.max_speed = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
@@ -202,17 +203,16 @@ class GenericImageOutput(object):
                 self.config.linewidth_is_constant():
             print("Elevation detection not required")
             return
-        tl = self.track_library
         currmin = None
         currmax = None
         print("Detecting min & max elevation (%s tracks)" % len(self.tracks))
         for path in self.tracks:
             if not currmin:
-                currmin = tl[path].min_elevation
-                currmax = tl[path].max_elevation
+                currmin = path.min_elevation
+                currmax = path.max_elevation
                 continue
-            currmin = min(currmin, tl[path].min_elevation)
-            currmax = max(currmax, tl[path].max_elevation)
+            currmin = min(currmin, path.min_elevation)
+            currmax = max(currmax, path.max_elevation)
         self.min_elevation = currmin
         self.max_elevation = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
@@ -226,8 +226,14 @@ class GenericImageOutput(object):
 
     def get_refined_tracks(self):
         self.tracks = []
-        kwargs = {"min_latitude": (None, self.max_latitude),
-                  "max_latitude": (self.min_latitude, None),
-                  "min_longitude": (None, self.max_longitude),
-                  "max_longitude": (self.min_longitude, None)}
+        kwargs = {}
+        kwargs["min_latitude"] = (None, self.max_latitude)
+        kwargs["max_latitude"] = (self.min_latitude, None)
+        kwargs["min_longitude"] = (None, self.max_longitude)
+        kwargs["max_longitude"] = (self.min_longitude, None)
+        if self.min_speed is not None:
+            kwargs["max_speed"] = (self.min_speed, None)
+        if self.max_speed is not None:
+            kwargs["min_speed"] = (None, self.max_speed)
+
         self.tracks = self.track_library.get_tracks(**kwargs)
