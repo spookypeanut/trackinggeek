@@ -111,7 +111,7 @@ def main():
     if inputpath:
         c.add_path(inputpath)
     if databasepath:
-        c.add_path(databasepath)
+        c.add_database(databasepath)
     if outma:
         c.save_ma(outma)
     if outpng:
