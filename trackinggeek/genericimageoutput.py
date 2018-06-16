@@ -127,7 +127,6 @@ class GenericImageOutput(object):
         currmax = None
         print("Detecting min & max speed (%s tracks)" % len(self.tracks))
         for path in self.tracks:
-            print(dir(path))
             if not currmin:
                 currmin = path.min_speed
                 currmax = path.max_speed
