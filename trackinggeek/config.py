@@ -198,10 +198,16 @@ class Config(ConfigParser):
         return float(value)
 
     def get_inputpath(self, override=None):
-        return self._generic_single_getter("input", "path", override)
+        try:
+            return self._generic_single_getter("input", "path", override)
+        except ConfigError:
+            return None
 
     def get_databasepath(self, override=None):
-        return self._generic_single_getter("input", "database", override)
+        try:
+            return self._generic_single_getter("input", "database", override)
+        except ConfigError:
+            return None
 
     def get_outpng(self, override=None):
         try:
