@@ -200,6 +200,9 @@ class Config(ConfigParser):
     def get_inputpath(self, override=None):
         return self._generic_single_getter("input", "path", override)
 
+    def get_databasepath(self, override=None):
+        return self._generic_single_getter("input", "database", override)
+
     def get_outpng(self, override=None):
         try:
             return self._generic_single_getter("output", "pngpath", override)
