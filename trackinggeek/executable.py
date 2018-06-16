@@ -45,6 +45,8 @@ def main():
                         help='path to the config file to use for defaults')
     parser.add_argument('--inputpath', action='store',
                         help='path to the gpx file / directory of gpx files')
+    parser.add_argument('--databasepath', action='store',
+                        help='path to the gpx file database root directory')
     parser.add_argument('--outsvg', action='store',
                         help='path to the output svg')
     parser.add_argument('--outpng', action='store',
@@ -94,6 +96,7 @@ def main():
         pixel_dimensions["height"] = int(y)
 
     inputpath = config.get_inputpath(args.inputpath)
+    databasepath = config.get_databasepath(args.databasepath)
 
     outpng = config.get_outpng(args.outpng)
     outsvg = config.get_outsvg(args.outsvg)
@@ -107,6 +110,8 @@ def main():
                     config=config)
     if inputpath:
         c.add_path(inputpath)
+    if databasepath:
+        c.add_path(databasepath)
     if outma:
         c.save_ma(outma)
     if outpng:
