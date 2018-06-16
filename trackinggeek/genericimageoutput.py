@@ -81,7 +81,7 @@ class GenericImageOutput(object):
         minimum / maximums we've been given.
         """
         if pixel_dimensions is None or len(pixel_dimensions.keys()) == 0:
-            pixel_dimensions = {"max":DEFAULT_SIZE}
+            pixel_dimensions = {"max": DEFAULT_SIZE}
         if "width" in pixel_dimensions and "height" in pixel_dimensions:
             self.pixel_width = pixel_dimensions["width"]
             self.pixel_height = pixel_dimensions["height"]
@@ -100,7 +100,8 @@ class GenericImageOutput(object):
         if "max" in pixel_dimensions:
             if self.aspect_ratio > 1:
                 self.pixel_width = pixel_dimensions["max"]
-                self.pixel_height = int(float(self.pixel_width) / self.aspect_ratio)
+                self.pixel_height = int(float(self.pixel_width) /
+                                        self.aspect_ratio)
                 return
             self.pixel_height = pixel_dimensions["max"]
             self.pixel_width = int(float(self.pixel_height) * self.aspect_ratio)
@@ -108,7 +109,8 @@ class GenericImageOutput(object):
         if "min" in pixel_dimensions:
             if self.aspect_ratio < 1:
                 self.pixel_width = pixel_dimensions["min"]
-                self.pixel_height = int(float(self.pixel_width) / self.aspect_ratio)
+                self.pixel_height = int(float(self.pixel_width) /
+                                        self.aspect_ratio)
                 return
             self.pixel_height = pixel_dimensions["min"]
             self.pixel_width = int(float(self.pixel_height) * self.aspect_ratio)
@@ -136,7 +138,6 @@ class GenericImageOutput(object):
         self.max_speed = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
 
-
     def add_track(self, path):
         tl = self.old_track_library
         tl.add_track(path, save_memory=self.config.savememory())
@@ -145,7 +146,7 @@ class GenericImageOutput(object):
                     tl[path].max_latitude < self.min_latitude or \
                     tl[path].min_longitude > self.max_longitude or \
                     tl[path].max_longitude < self.min_longitude:
-                #print("Outside our specified area")
+                # print("Outside our specified area")
                 return
         min_date = self.config.get_min_date()
         max_date = self.config.get_max_date()
