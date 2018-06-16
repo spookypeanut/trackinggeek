@@ -6,11 +6,13 @@ from calendar import monthrange
 
 from trackinggeek.colour import Palette
 
+
 class ConfigError(ValueError):
     pass
 
 TRUESTRINGS = ["yes", "y", "1", "true", "t"]
 FALSESTRINGS = ["no", "n", "0", "false", "f"]
+
 
 def stringtobool(value):
     if value.lower() in TRUESTRINGS:
@@ -18,6 +20,7 @@ def stringtobool(value):
     if value.lower() in FALSESTRINGS:
         return False
     raise ValueError("%s is neither true or false" % value)
+
 
 def get_multivalue(stringpair):
     try:
@@ -27,6 +30,7 @@ def get_multivalue(stringpair):
     except ValueError:
         msg = "Invalid format: %s" % stringpair
         raise ConfigError(msg)
+
 
 class Config(ConfigParser):
     def __init__(self, filepath):
@@ -113,19 +117,22 @@ class Config(ConfigParser):
 
     def get_elevation_range(self, override=None):
         try:
-            return self._generic_multi_getter("drawing", "elevation_range", override)
+            return self._generic_multi_getter("drawing", "elevation_range",
+                                              override)
         except ConfigError:
             return None
 
     def get_speed_range(self, override=None):
         try:
-            return self._generic_multi_getter("drawing", "speed_range", override)
+            return self._generic_multi_getter("drawing", "speed_range",
+                                              override)
         except ConfigError:
             return None
 
     def get_basecolour(self, override=None):
         try:
-            result = self._generic_multi_getter("drawing", "basecolour", override)
+            result = self._generic_multi_getter("drawing", "basecolour",
+                                                override)
         except ConfigError:
             return None
         if not result:
@@ -148,14 +155,15 @@ class Config(ConfigParser):
 
     def get_background(self, override=None):
         try:
-            return tuple([float(value) for value in
-                self._generic_multi_getter("drawing", "background", override)])
+            tmplist = self._generic_multi_getter("drawing", "background",
+                                                 override)
+            return tuple([float(value) for value in tmplist])
         except ConfigError:
             return None
 
     def get_colour(self, override=None):
-        return tuple([float(value) for value in
-                self._generic_multi_getter("drawing", "colour", override)])
+        tmplist = self._generic_multi_getter("drawing", "colour", override)
+        return tuple([float(value) for value in tmplist])
 
     def get_linewidth_type(self, override=None):
         """ Get the type of variation in the linewidth
@@ -180,32 +188,33 @@ class Config(ConfigParser):
         return float(value)
 
     def get_linewidth_min(self, override=None):
-        value = self._generic_single_getter("drawing", "linewidth_min", override)
+        value = self._generic_single_getter("drawing", "linewidth_min",
+                                            override)
         return float(value)
 
     def get_linewidth_max(self, override=None):
-        value = self._generic_single_getter("drawing", "linewidth_max", override)
+        value = self._generic_single_getter("drawing", "linewidth_max",
+                                            override)
         return float(value)
 
     def get_inputpath(self, override=None):
-        return(self._generic_single_getter("input", "path",
-            override))
+        return self._generic_single_getter("input", "path", override)
 
     def get_outpng(self, override=None):
         try:
-            return(self._generic_single_getter("output", "pngpath", override))
+            return self._generic_single_getter("output", "pngpath", override)
         except ConfigError:
             return None
 
     def get_outsvg(self, override=None):
         try:
-            return(self._generic_single_getter("output", "svgpath", override))
+            return self._generic_single_getter("output", "svgpath", override)
         except ConfigError:
             return None
 
     def get_outma(self, override=None):
         try:
-            return(self._generic_single_getter("output", "mapath", override))
+            return self._generic_single_getter("output", "mapath", override)
         except ConfigError:
             return None
 
@@ -248,20 +257,20 @@ class Config(ConfigParser):
         the config, return None
         """
         try:
-            minyear = int(self._generic_single_getter("input", "minyear",
-                            None))
+            tmpstr = self._generic_single_getter("input", "minyear", None)
+            minyear = int(tmpstr)
         except ConfigError:
             return None
         try:
-            minmonth = int(self._generic_single_getter("input", "minmonth",
-                            None))
+            tmpstr = self._generic_single_getter("input", "minmonth", None)
+            minmonth = int(tmpstr)
         except ConfigError:
             minmonth = 1
             minday = 1
         else:
             try:
-                minday = int(self._generic_single_getter("input", "minday",
-                            None))
+                tmpstr = self._generic_single_getter("input", "minday", None)
+                minday = int(tmpstr)
             except ConfigError:
                 minday = 1
         return date(minyear, minmonth, minday)
@@ -271,20 +280,19 @@ class Config(ConfigParser):
         the config, return None
         """
         try:
-            maxyear = int(self._generic_single_getter("input", "maxyear",
-                None))
+            maxyear = int(self._generic_single_getter("input", "maxyear", None))
         except ConfigError:
             return None
         try:
-            maxmonth = int(self._generic_single_getter("input", "maxmonth",
-                None))
+            tmpstr = self._generic_single_getter("input", "maxmonth", None)
+            maxmonth = int(tmpstr)
         except ConfigError:
             maxmonth = 12
             maxday = 31
         else:
             try:
-                maxday = int(self._generic_single_getter("input", "maxday",
-                    None))
+                tmpstr = self._generic_single_getter("input", "maxday", None)
+                maxday = int(tmpstr)
             except ConfigError:
                 maxday = monthrange(maxyear, maxmonth)[1]
         return date(maxyear, maxmonth, maxday)
