@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from trackinggeek.tracklibrary import TrackLibraryDB
-from trackinggeek.util import mercator_adjust
+from trackinggeek.tracklibrary import TrackLibraryDB, OldTrackLibrary
+from trackinggeek.util import mercator_adjust, tracks_from_path
 
 DEFAULT_SIZE = 1024
 
@@ -55,6 +55,7 @@ class GenericImageOutput(object):
         else:
             self.min_speed = None
             self.max_speed = None
+        self.old_track_library = OldTrackLibrary()
 
     def draw(self):
         raise NotImplementedError
@@ -137,7 +138,7 @@ class GenericImageOutput(object):
 
 
     def add_track(self, path):
-        tl = self.track_library
+        tl = self.old_track_library
         tl.add_track(path, save_memory=self.config.savememory())
         if self.max_latitude:
             if tl[path].min_latitude > self.max_latitude or \
@@ -218,6 +219,15 @@ class GenericImageOutput(object):
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_path(self, path):
+        tracklist = tracks_from_path(path)
+        total = len(tracklist)
+        counter = 0
+        print("Parsing %i tracks" % total)
+        for track in tracklist:
+            self.add_track(track)
+            counter += 1
+            if counter % 100 == 0:
+                print("\tParsed %i/%i tracks" % (counter, total))
 
     def add_database(self, database_path):
         self.track_library = TrackLibraryDB(library_dir=database_path)
