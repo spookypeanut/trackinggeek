@@ -55,20 +55,22 @@ class Track(object):
     def __hash__(self):
         return hash(self.sha1)
 
-    def get_parsed(self):
-        if self.save_memory:
-            with open(self.path, "r") as gpx_file:
-                return gpxpy.parse(gpx_file)
-        else:
-            if not hasattr(self, "_parsed_track"):
+    def get_parsed(self, force=False):
+        if force is True:
+            if not os.path.exists(self.path):
+                raise OSError("%s doesn't exist" % self.path)
+            try:
                 with open(self.path, "r") as gpx_file:
-                    try:
-                        self._parsed_track = gpxpy.parse(gpx_file)
-                    except:
-                        # We can do a bare except, as we're re-raising
-                        print("Errored path: %s" % self.path)
-                        raise
-            return self._parsed_track
+                    return gpxpy.parse(gpx_file)
+            except:
+                # We can do a bare except, as we're re-raising
+                print("Errored path: %s" % self.path)
+                raise
+        if self.save_memory:
+            return self.get_parsed(force=True)
+        if not hasattr(self, "_parsed_track"):
+            self._parsed_track = self.get_parsed(force=True)
+        return self._parsed_track
 
     def get_segments(self):
         segments = []
