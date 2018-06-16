@@ -218,7 +218,9 @@ class GenericImageOutput(object):
         print("Detected range is %s - %s" % (currmin, currmax))
 
     def add_path(self, path):
-        self.track_library = TrackLibraryDB(library_dir=path)
+
+    def add_database(self, database_path):
+        self.track_library = TrackLibraryDB(library_dir=database_path)
         num_tracks = len(self.track_library.get_tracks())
         print("Database contains %i tracks" % num_tracks)
         self.get_refined_tracks()
