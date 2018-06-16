@@ -71,14 +71,6 @@ def get_relative_vault_path(track):
     return (dirname, basename)
 
 
-def _convert_to_track_object(raw_tuple):
-    columns = sorted(_TRACK_ATTRIBUTES.keys())
-    tmp_dict = dict(zip(columns, raw_tuple))
-    tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
-    tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
-    return TrackDB(tmp_dict)
-
-
 class TrackLibraryDB(object):
     """ Information about all the tracks, stored in an sqlite database """
     global_table = "global"
@@ -111,6 +103,13 @@ class TrackLibraryDB(object):
             self._dbpath = db_path
         self._debug = debug
         self._connect_db()
+
+    def _get_track_object_from_tuple(self, raw_tuple):
+        columns = sorted(_TRACK_ATTRIBUTES.keys())
+        tmp_dict = dict(zip(columns, raw_tuple))
+        tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
+        tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
+        return TrackDB(tmp_dict, self.vault_dir)
 
     def debug(self, msg):
         # The original parent class of the class this was copied from
@@ -280,7 +279,7 @@ class TrackLibraryDB(object):
                 raise ValueError("Multiple tracks found with hash %s" % sha1)
         return_list = []
         for raw_tuple in raw_tuples:
-            return_list.append(_convert_to_track_object(raw_tuple))
+            return_list.append(self._get_track_object_from_tuple(raw_tuple))
         if allow_multiple is True:
             return return_list
         return return_list[0]
@@ -315,7 +314,7 @@ class TrackLibraryDB(object):
         raw_tuples = self._cursor.fetchall()
         return_set = set()
         for raw_tuple in raw_tuples:
-            _track_object = _convert_to_track_object(raw_tuple)
+            _track_object = self._get_track_object_from_tuple(raw_tuple)
             return_set.add(_track_object)
         return return_set
 

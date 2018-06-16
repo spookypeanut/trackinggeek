@@ -56,11 +56,12 @@ class Track(object):
         return hash(self.sha1)
 
     def get_parsed(self, force=False):
+        path = self._get_filepath()
         if force is True:
-            if not os.path.exists(self.path):
-                raise OSError("%s doesn't exist" % self.path)
+            if not os.path.exists(path):
+                raise OSError("%s doesn't exist" % path)
             try:
-                with open(self.path, "r") as gpx_file:
+                with open(path, "r") as gpx_file:
                     return gpxpy.parse(gpx_file)
             except:
                 # We can do a bare except, as we're re-raising
@@ -133,8 +134,7 @@ class Track(object):
                 self._sha1.update(data)
         return self._sha1.hexdigest()
 
-    @property
-    def _filepath(self):
+    def _get_filepath(self):
         """ The db track has a different "path" (the original path of the file)
         to "_filepath" (the actual path to the file). But by default, they're
         the same.
@@ -143,17 +143,30 @@ class Track(object):
 
 
 class TrackDB(Track):
-    def __init__(self, data, save_memory=False):
+    def __init__(self, data, base_dir, save_memory=False):
         """ Instantiate a track object using the data retrieved from the
         database. Note that the "path" in the database isn't the actual path to
         the file on disk, it's now stored in the database vault. Thus we have
         "original_path" for that, and "path" for the actual vault path (based
         on sha1).
         """
+        self.base_dir = base_dir
         for key, value in data.items():
             parameter = "_%s" % key
             setattr(self, parameter, value)
         self.save_memory = save_memory
+
+    def get_relative_vault_path(self):
+        dirname = self.sha1[:3]
+        basename = "%s.gpx" % self.sha1[3:]
+        return (dirname, basename)
+
+    def _get_filepath(self):
+        """ The db track has a different "path" (the original path of the file)
+        to "_filepath" (the actual path to the file). But by default, they're
+        the same.
+        """
+        return os.path.join(self.base_dir, *self.get_relative_vault_path())
 
 
 class TrackPath(Track):
