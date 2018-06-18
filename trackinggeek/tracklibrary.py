@@ -274,7 +274,6 @@ class TrackLibraryDB(object):
                 clauses.append((min_template % key, min_))
             if max_ is not None:
                 clauses.append((max_template % key, max_))
-        print(clauses)
         if clauses:
             sql += " WHERE "
             sql += " AND ".join([c[0] for c in clauses])
