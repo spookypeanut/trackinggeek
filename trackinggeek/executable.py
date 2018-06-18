@@ -109,8 +109,10 @@ def main():
                     speed_range=speed_range,
                     config=config)
     if inputpath:
+        print("Adding input path")
         c.add_path(inputpath)
     if databasepath:
+        print("Adding database path")
         c.add_database(databasepath)
     if outma:
         c.save_ma(outma)
