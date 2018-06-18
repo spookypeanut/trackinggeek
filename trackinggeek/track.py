@@ -57,6 +57,7 @@ class Track(object):
     def get_parsed(self, force=False):
         path = self._get_filepath()
         if force is True:
+            print("Parsing %s" % path)
             if not os.path.exists(path):
                 raise OSError("%s doesn't exist" % path)
             try:
@@ -64,7 +65,7 @@ class Track(object):
                     return gpxpy.parse(gpx_file)
             except:
                 # We can do a bare except, as we're re-raising
-                print("Errored path: %s" % self.path)
+                print("Errored path: %s" % path)
                 raise
         if self.save_memory:
             return self.get_parsed(force=True)
