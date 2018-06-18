@@ -28,8 +28,7 @@ _TRACK_ATTRIBUTES = {"path": str, "sha1": str,
                      "min_latitude": float, "max_latitude": float,
                      "min_longitude": float, "max_longitude": float,
                      "min_speed": float, "max_speed": float,
-                     "min_time": datetime, "max_time": datetime,
-                     "stored_in_vault": bool}
+                     "min_time": datetime, "max_time": datetime}
 
 
 def get_track(path):
@@ -176,5 +175,4 @@ class TrackPath(Track):
             msg = "The gpx file '%s' does not exist" % path
             raise IOError(msg)
         self.save_memory = save_memory
-        self.stored_in_vault = False
         self.path = path

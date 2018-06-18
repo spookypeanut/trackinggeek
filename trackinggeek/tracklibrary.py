@@ -1,6 +1,5 @@
 import os
 import sqlite3
-import shutil
 from datetime import date, datetime, timedelta
 from trackinggeek.track import TrackPath, TrackError, TrackDB, _TRACK_ATTRIBUTES
 from trackinggeek.util import tracks_from_path
@@ -76,26 +75,16 @@ class TrackLibraryDB(object):
     global_table = "global"
     track_table = "track"
 
-    def __init__(self, library_dir=None, db_path=None, vault_dir=None,
-                 debug=False):
+    def __init__(self, library_dir=None, db_path=None, debug=False):
         # If we get given a path, use it, but we can make up our own
         if library_dir is None:
             self.library_dir = get_library_dir()
         else:
             self.library_dir = library_dir
-        if vault_dir is None:
-            self.vault_dir = os.path.join(self.library_dir, "vault")
-        else:
-            self.vault_dir = vault_dir
         try:
             os.makedirs(self.library_dir)
         except Exception:
             if not os.path.isdir(self.library_dir):
-                raise
-        try:
-            os.makedirs(self.vault_dir)
-        except Exception:
-            if not os.path.isdir(self.vault_dir):
                 raise
         if db_path is None:
             self._dbpath = os.path.join(self.library_dir, "tracklibrary.db")
@@ -109,7 +98,7 @@ class TrackLibraryDB(object):
         tmp_dict = dict(zip(columns, raw_tuple))
         tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
         tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
-        return TrackDB(tmp_dict, self.vault_dir)
+        return TrackDB(tmp_dict, self.library_dir)
 
     def debug(self, msg):
         # The original parent class of the class this was copied from
@@ -197,11 +186,9 @@ class TrackLibraryDB(object):
             self.add_track(t)
 
     def add_track(self, track):
+        assert self.check_vault(track)
         results = []
         for column in sorted(_TRACK_ATTRIBUTES):
-            if column == "stored_in_vault":
-                results.append(False)
-                continue
             value = getattr(track, column)
             if value.__class__ in _CONVERTER:
                 results.append(_CONVERTER[value.__class__][0](value))
@@ -211,41 +198,18 @@ class TrackLibraryDB(object):
         sql = "INSERT INTO %s VALUES (%s)"
         sql = sql % (_check(self.track_table), question_marks)
         self._execute(sql, results)
-        self.move_track_to_vault(track)
-
-        if not self.check_vault(track):
-            raise IOError("Failed to store track %s in vault" % track.path)
-        # TODO: Check there's only one result
-        sql = "UPDATE %s SET stored_in_vault = 1 WHERE sha1 == '%s'"
-        sql = sql % (_check(self.track_table), _check(track.sha1))
-        self._execute(sql)
         return self.get_track(track.sha1)
 
     def get_vault_path(self, track):
         dirname, basename = get_relative_vault_path(track)
-        return os.path.join(self.vault_dir, dirname), basename
-
-    def move_track_to_vault(self, track):
-        """ Copy the given track into the vault of the track library """
-        dirname, basename = self.get_vault_path(track)
-        try:
-            os.makedirs(dirname)
-        except OSError:
-            if not os.path.isdir(dirname):
-                raise
-        destpath = os.path.join(dirname, basename)
-        if os.path.isfile(destpath):
-            raise IOError("Path %s already exists!" % destpath)
-        self._debug("Moving %s to %s" % (track.path, destpath))
-        shutil.move(track.path, destpath)
+        return os.path.join(self.library_dir, dirname), basename
 
     def check_vault(self, track):
         """ Check that the file for the given track is in the vault """
-        dirname, basename = self.get_vault_path(track)
-        fullpath = os.path.join(dirname, basename)
-        if not os.path.exists(fullpath):
-            return False
-        return True
+        if track.path.startswith(self.library_dir):
+            if os.path.exists(self.path):
+                return True
+        return False
 
     def has_track(self, track):
         """ Check if the given track is in the database (not necessarily the
