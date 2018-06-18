@@ -81,6 +81,7 @@ class TrackLibraryDB(object):
             self.library_dir = get_library_dir()
         else:
             self.library_dir = library_dir
+        self.library_dir = os.path.realpath(self.library_dir)
         try:
             os.makedirs(self.library_dir)
         except Exception:
@@ -98,7 +99,9 @@ class TrackLibraryDB(object):
         tmp_dict = dict(zip(columns, raw_tuple))
         tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
         tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
-        return TrackDB(tmp_dict, self.library_dir)
+        tmp_dict["path"] = os.path.join(self.library_dir, tmp_dict["path"])
+        track_object = TrackDB(tmp_dict)
+        return track_object
 
     def debug(self, msg):
         # The original parent class of the class this was copied from
@@ -179,7 +182,7 @@ class TrackLibraryDB(object):
         for counter, eachtrack in enumerate(tracks):
             if counter and counter % 20 == 0:
                 print("Added %s/%s tracks" % (counter, len(tracks)))
-            t = TrackPath(eachtrack)
+            t = TrackPath(os.path.realpath(eachtrack))
             if self.has_track(t):
                 print("Skipping %s, already in database" % eachtrack)
                 continue
@@ -190,6 +193,9 @@ class TrackLibraryDB(object):
         results = []
         for column in sorted(_TRACK_ATTRIBUTES):
             value = getattr(track, column)
+            if column == "path":
+                # Store relative paths
+                value = value[len(self.library_dir) + 1:]
             if value.__class__ in _CONVERTER:
                 results.append(_CONVERTER[value.__class__][0](value))
             else:
@@ -207,7 +213,7 @@ class TrackLibraryDB(object):
     def check_vault(self, track):
         """ Check that the file for the given track is in the vault """
         if track.path.startswith(self.library_dir):
-            if os.path.exists(self.path):
+            if os.path.exists(track.path):
                 return True
         return False
 
