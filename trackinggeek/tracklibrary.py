@@ -11,16 +11,22 @@ _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
 
 def _date_to_int(mydate):
     """ Convert a datetime.date object to a unix timestamp """
+    if mydate is None:
+        return None
     return _datetime_to_int(datetime.combine(mydate, datetime.min.time()))
 
 
 def _datetime_to_int(mytime):
     """ Convert a datetime.datetime object to a unix timestamp. """
     # Apparently, this is the safest way to do it (ignoring timezones)
+    if mytime is None:
+        return None
     return int((mytime - datetime(1970, 1, 1)).total_seconds())
 
 
 def _timedelta_to_int(mytimedelta):
+    if mytimedelta is None:
+        return None
     return mytimedelta.seconds
 
 
@@ -269,6 +275,10 @@ class TrackLibraryDB(object):
         min_template = "%s >= ?"
         max_template = "%s <= ?"
         for key, value in kwargs.items():
+            param_class = value[0].__class__
+            if param_class in _CONVERTER:
+                converter = _CONVERTER[param_class][0]
+                value = tuple(map(converter, list(value)))
             min_, max_ = value
             if min_ is not None:
                 clauses.append((min_template % key, min_))
