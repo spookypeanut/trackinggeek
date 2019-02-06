@@ -107,13 +107,17 @@ class TrackLibraryDB(object):
             raise IOError(msg % self.library_dir)
 
     def _get_track_object_from_tuple(self, raw_tuple):
-        columns = sorted(_TRACK_ATTRIBUTES.keys())
-        tmp_dict = dict(zip(columns, raw_tuple))
-        tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
-        tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
-        tmp_dict["path"] = os.path.join(self.library_dir, tmp_dict["path"])
-        track_object = TrackDB(tmp_dict)
-        return track_object
+        try:
+            columns = sorted(_TRACK_ATTRIBUTES.keys())
+            tmp_dict = dict(zip(columns, raw_tuple))
+            tmp_dict["min_time"] = _int_to_datetime(tmp_dict["min_time"])
+            tmp_dict["max_time"] = _int_to_datetime(tmp_dict["max_time"])
+            tmp_dict["path"] = os.path.join(self.library_dir, tmp_dict["path"])
+            track_object = TrackDB(tmp_dict)
+            return track_object
+        except:
+            print("Error parsing: %s" % (raw_tuple,))
+            raise
 
     def debug(self, msg):
         # The original parent class of the class this was copied from
