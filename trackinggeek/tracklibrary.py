@@ -201,6 +201,13 @@ class TrackLibraryDB(object):
         self._create_global_table()
         self._create_track_table()
 
+    def clean_tracks(self, execute=False):
+        to_delete = set()
+        for eachtrack in self.get_tracks():
+            if self.check_vault(eachtrack) is False:
+                to_delete.add(eachtrack)
+        print("\n".join([a.path for a in sorted(to_delete)]))
+
     def remove_sha(self, sha):
         sql = 'DELETE FROM %s WHERE sha1 = "%s"' 
         sql = sql % (self.track_table, _check(sha))

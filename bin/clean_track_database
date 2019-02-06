@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
+from trackinggeek import tracklibrary
+
+
+def parse_args():
+    parser = ArgumentParser()
+    ph = "The path to the track library database"
+    parser.add_argument("path", help=ph)
+    parser.add_argument("--execute", action="store_true")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    tldb = tracklibrary.TrackLibraryDB(db_path=args.path)
+    tldb.clean_tracks(execute=args.execute)
+
+
+if __name__ == "__main__":
+    main()
