@@ -233,6 +233,8 @@ class TrackLibraryDB(object):
                 results.append(_CONVERTER[value.__class__][0](value))
             else:
                 results.append(value)
+        if None in results:
+            raise ValueError("Track %s has None values" % track.path)
         question_marks = ", ".join("?" * len(results))
         sql = "INSERT INTO %s VALUES (%s)"
         sql = sql % (_check(self.track_table), question_marks)
