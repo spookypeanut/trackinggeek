@@ -246,9 +246,15 @@ class GenericImageOutput(object):
         kwargs["min_longitude"] = (None, self.max_longitude)
         kwargs["max_longitude"] = (self.min_longitude, None)
         min_date = self.config.get_min_date()
-        min_time = datetime.combine(min_date, datetime.min.time())
+        if min_date is None:
+            min_time = datetime.min
+        else:
+            min_time = datetime.combine(min_date, datetime.min.time())
         max_date = self.config.get_max_date()
-        max_time = datetime.combine(max_date, datetime.max.time())
+        if max_date is None:
+            max_time = datetime.max
+        else:
+            max_time = datetime.combine(max_date, datetime.max.time())
         kwargs["min_time"] = (None, max_time)
         kwargs["max_time"] = (min_time, None)
         if self.min_speed is not None:
