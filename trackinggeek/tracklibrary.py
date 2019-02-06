@@ -197,6 +197,9 @@ class TrackLibraryDB(object):
         self._create_global_table()
         self._create_track_table()
 
+    def add_new_tracks(self):
+        return self.add_track_directory(self.library_dir)
+
     def add_track_directory(self, path):
         tracks = tracks_from_path(path)
         print("Adding %s tracks to database" % len(tracks))
