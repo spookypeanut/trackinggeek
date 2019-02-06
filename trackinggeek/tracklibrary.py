@@ -83,22 +83,28 @@ class TrackLibraryDB(object):
 
     def __init__(self, library_dir=None, db_path=None, debug=False):
         # If we get given a path, use it, but we can make up our own
-        if library_dir is None:
-            self.library_dir = get_library_dir()
-        else:
-            self.library_dir = library_dir
-        self.library_dir = os.path.realpath(self.library_dir)
-        try:
-            os.makedirs(self.library_dir)
-        except Exception:
-            if not os.path.isdir(self.library_dir):
-                raise
         if db_path is None:
+            if library_dir is None:
+                self.library_dir = get_library_dir()
+            else:
+                self.library_dir = library_dir
+            self.library_dir = os.path.realpath(self.library_dir)
+            try:
+                os.makedirs(self.library_dir)
+            except Exception:
+                if not os.path.isdir(self.library_dir):
+                    raise
             self._dbpath = os.path.join(self.library_dir, "tracklibrary.db")
         else:
             self._dbpath = db_path
+            self.library_dir = None
         self._debug = debug
         self._connect_db()
+        if self.library_dir is None:
+            self.update_library_dir_from_database()
+        if not os.path.isdir(self.library_dir):
+            msg = "Library directory %s doesn't exist"
+            raise IOError(msg % self.library_dir)
 
     def _get_track_object_from_tuple(self, raw_tuple):
         columns = sorted(_TRACK_ATTRIBUTES.keys())
@@ -149,6 +155,15 @@ class TrackLibraryDB(object):
             self._connect_db()
         else:
             self.warning("No database present at %s" % self._dbpath)
+
+    def update_library_dir_from_database(self):
+        table_name = _check(self.global_table)
+        sql = 'SELECT value FROM %s WHERE parameter = "library_dir"'
+        sql = sql % table_name
+        self._execute(sql)
+        raw_tuple = self._cursor.fetchone()
+        self.library_dir = raw_tuple[0]
+        return self.library_dir
 
     def _create_global_table(self):
         table_name = _check(self.global_table)
