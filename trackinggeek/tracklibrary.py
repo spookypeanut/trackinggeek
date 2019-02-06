@@ -201,6 +201,11 @@ class TrackLibraryDB(object):
         self._create_global_table()
         self._create_track_table()
 
+    def remove_sha(self, sha):
+        sql = 'DELETE FROM %s WHERE sha1 = "%s"' 
+        sql = sql % (self.track_table, _check(sha))
+        return self._execute(sql)
+
     def add_new_tracks(self):
         return self.add_track_directory(self.library_dir)
 

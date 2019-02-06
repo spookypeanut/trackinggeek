@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
+from trackinggeek import tracklibrary
+
+
+def parse_args():
+    parser = ArgumentParser()
+    ph = "The path to the track library database"
+    parser.add_argument("path", help=ph)
+    sh = "The sha of the track to drop from the database"
+    parser.add_argument("sha", help=sh)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    tldb = tracklibrary.TrackLibraryDB(db_path=args.path)
+    tldb.remove_sha(args.sha)
+
+if __name__ == "__main__":
+    main()
