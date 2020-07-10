@@ -219,14 +219,16 @@ class TrackLibraryDB(object):
     def add_track_directory(self, path):
         tracks = tracks_from_path(path)
         print("Adding %s tracks to database" % len(tracks))
+        actual_added = 0
         for counter, eachtrack in enumerate(tracks):
-            if counter and counter % 20 == 0:
-                print("Added %s/%s tracks" % (counter, len(tracks)))
+            if counter and counter % 100 == 0:
+                print("Scanned %s/%s tracks" % (counter, len(tracks)))
             t = TrackPath(os.path.realpath(eachtrack))
             if self.has_track(t):
-                print("Skipping %s, already in database" % eachtrack)
                 continue
+            actual_added += 1
             self.add_track(t)
+        print("Added %s new tracks" % actual_added)
 
     def add_track(self, track):
         assert self.check_vault(track)
