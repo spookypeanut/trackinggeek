@@ -1,9 +1,9 @@
 import os
 import sqlite3
 from datetime import date, datetime, timedelta
-from trackinggeek.track import TrackPath, TrackError, TrackDB, _TRACK_ATTRIBUTES
+from trackinggeek.track import (TrackPath, TrackError, TrackDB,
+                                _TRACK_ATTRIBUTES)
 from trackinggeek.util import tracks_from_path
-import logging
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", datetime: "INTEGER", timedelta: "INTEGER",

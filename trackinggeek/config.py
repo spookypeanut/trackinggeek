@@ -13,6 +13,7 @@ from trackinggeek.colour import Palette
 class ConfigError(ValueError):
     pass
 
+
 TRUESTRINGS = ["yes", "y", "1", "true", "t"]
 FALSESTRINGS = ["no", "n", "0", "false", "f"]
 
@@ -292,7 +293,8 @@ class Config(ConfigParser):
         the config, return None
         """
         try:
-            maxyear = int(self._generic_single_getter("input", "maxyear", None))
+            maxyear = int(self._generic_single_getter("input", "maxyear",
+                                                      None))
         except ConfigError:
             return None
         try:

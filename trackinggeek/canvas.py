@@ -78,7 +78,7 @@ class Canvas(object):
             point_generator = (p for p in segment.points)
             first = next(point_generator)
             pixels = self._convert_to_fraction(Point(first.latitude,
-                first.longitude))
+                                                     first.longitude))
             self.ctx.move_to(*pixels)
             previous_point = first
 
@@ -93,7 +93,7 @@ class Canvas(object):
                 elevation = eachpoint.elevation
                 current_colour = self._get_colour(speed, elevation)
                 current_width = self._get_linewidth(speed, elevation)
-                self.ctx.set_source_rgb(*current_colour) # Solid color
+                self.ctx.set_source_rgb(*current_colour)  # Solid color
                 self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
                 self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
                 self.ctx.set_line_width(current_width / self.pixel_width)
@@ -103,7 +103,7 @@ class Canvas(object):
                 previous_point = eachpoint
 
             if not variabletrack:
-                self.ctx.set_source_rgb(*base_colour) # Solid color
+                self.ctx.set_source_rgb(*base_colour)  # Solid color
                 self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
                 self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
                 self.ctx.set_line_width(1.0 / self.pixel_width)
