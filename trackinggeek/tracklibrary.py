@@ -9,6 +9,10 @@ _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", datetime: "INTEGER", timedelta: "INTEGER",
                 bool: "BOOLEAN"}
 
+# This creates a translation table whereby each of these characters
+# translates to nothing
+_SQL_CHECK = str.maketrans(dict.fromkeys(")(][;,"))
+
 
 def _date_to_int(mydate):
     """ Convert a datetime.date object to a unix timestamp """
@@ -61,7 +65,7 @@ def _check(mystr):
     # change in future
     if not isinstance(mystr, str):
         return [_check(s) for s in mystr]
-    if mystr != mystr.translate(None, ")(][;,"):
+    if mystr != mystr.translate(_SQL_CHECK):
         raise RuntimeError("Input '%s' looks dodgy to me" % mystr)
     return mystr
 

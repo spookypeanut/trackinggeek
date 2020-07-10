@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
-from point import Point
+from trackinggeek.point import Point
 from trackinggeek.colour import DEFAULT_COLOUR, DEFAULT_PALETTE
 from trackinggeek.util import mercator_adjust
 from trackinggeek.config import ConfigError
@@ -76,7 +76,7 @@ class Canvas(object):
                         not self.config.linewidth_is_constant()
         for segment in track.get_segments():
             point_generator = (p for p in segment.points)
-            first = point_generator.next()
+            first = next(point_generator)
             pixels = self._convert_to_fraction(Point(first.latitude,
                 first.longitude))
             self.ctx.move_to(*pixels)

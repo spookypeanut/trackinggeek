@@ -69,8 +69,11 @@ class Track(object):
                 raise
         if self.save_memory:
             return self.get_parsed(force=True)
-        if not hasattr(self, "_parsed_track"):
-            self._parsed_track = self.get_parsed(force=True)
+        try:
+            return self._parsed_track
+        except (KeyError, AttributeError):
+            pass
+        self._parsed_track = self.get_parsed(force=True)
         return self._parsed_track
 
     def get_segments(self):

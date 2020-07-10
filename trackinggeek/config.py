@@ -1,5 +1,8 @@
 import os
-from ConfigParser import ConfigParser, NoSectionError, NoOptionError
+try:
+    from configparser import ConfigParser, NoSectionError, NoOptionError
+except ImportError:
+    from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from ast import literal_eval
 from datetime import date
 from calendar import monthrange
