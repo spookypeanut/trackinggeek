@@ -3,6 +3,7 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from trackinggeek.track import TrackPath, TrackError, TrackDB, _TRACK_ATTRIBUTES
 from trackinggeek.util import tracks_from_path
+import logging
 
 _TYPE_LOOKUP = {str: "STRING", int: "INTEGER", float: "FLOAT",
                 date: "INTEGER", datetime: "INTEGER", timedelta: "INTEGER",
@@ -209,7 +210,7 @@ class TrackLibraryDB(object):
         print("\n".join([a.path for a in sorted(to_delete)]))
 
     def remove_sha(self, sha):
-        sql = 'DELETE FROM %s WHERE sha1 = "%s"' 
+        sql = 'DELETE FROM %s WHERE sha1 = "%s"'
         sql = sql % (self.track_table, _check(sha))
         return self._execute(sql)
 
