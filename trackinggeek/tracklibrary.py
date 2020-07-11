@@ -93,7 +93,6 @@ class TrackLibraryDB(object):
                 self.library_dir = get_library_dir()
             else:
                 self.library_dir = library_dir
-            self.library_dir = os.path.realpath(self.library_dir)
             try:
                 os.makedirs(self.library_dir)
             except Exception:
@@ -101,12 +100,13 @@ class TrackLibraryDB(object):
                     raise
             self._dbpath = os.path.join(self.library_dir, "tracklibrary.db")
         else:
-            self._dbpath = db_path
+            self._dbpath = os.path.realpath(db_path)
             self.library_dir = None
         self._debug = debug
         self._connect_db()
         if self.library_dir is None:
             self.update_library_dir_from_database()
+        self.library_dir = os.path.realpath(self.library_dir)
         if not os.path.isdir(self.library_dir):
             msg = "Library directory %s doesn't exist"
             raise IOError(msg % self.library_dir)
@@ -236,7 +236,7 @@ class TrackLibraryDB(object):
         print("Added %s new tracks" % actual_added)
 
     def add_track(self, track):
-        assert self.check_vault(track)
+        self.assert_vault(track)
         results = []
         for column in sorted(_TRACK_ATTRIBUTES):
             value = getattr(track, column)
@@ -258,6 +258,11 @@ class TrackLibraryDB(object):
     def get_vault_path(self, track):
         dirname, basename = get_relative_vault_path(track)
         return os.path.join(self.library_dir, dirname), basename
+
+    def assert_vault(self, track):
+        if self.check_vault(track) is False:
+            msg = "%s is not in the vault (%s)"
+            raise RuntimeError(msg % (track.path, self.library_dir))
 
     def check_vault(self, track):
         """ Check that the file for the given track is in the vault """
