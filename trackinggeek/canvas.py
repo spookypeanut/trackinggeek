@@ -127,6 +127,8 @@ class Canvas(object):
                        (self.max_elevation - self.min_elevation)
             return palette.interpolate(fraction)
         if lw_type == "speed":
+            if speed is None:
+                return palette.interpolate(0.0)
             if speed > self.max_speed:
                 return palette.interpolate(1.0)
             if speed < self.min_speed:
