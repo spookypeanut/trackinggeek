@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from trackinggeek.track import (TrackPath, TrackError, TrackDB,
                                 _TRACK_ATTRIBUTES)
 from trackinggeek.util import tracks_from_path
@@ -26,7 +26,8 @@ def _datetime_to_int(mytime):
     # Apparently, this is the safest way to do it (ignoring timezones)
     if mytime is None:
         return None
-    return int((mytime - datetime(1970, 1, 1)).total_seconds())
+    origin = datetime.fromtimestamp(0, timezone.utc)
+    return int((mytime - origin).total_seconds())
 
 
 def _timedelta_to_int(mytimedelta):

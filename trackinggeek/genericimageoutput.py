@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from trackinggeek.tracklibrary import TrackLibraryDB, OldTrackLibrary
 from trackinggeek.util import mercator_adjust, tracks_from_path
@@ -247,14 +247,17 @@ class GenericImageOutput(object):
         kwargs["max_longitude"] = (self.min_longitude, None)
         min_date = self.config.get_min_date()
         if min_date is None:
-            min_time = datetime.min
+            min_time = datetime.min.replace(tzinfo=timezone.utc)
         else:
-            min_time = datetime.combine(min_date, datetime.min.time())
+            temp_min_time = datetime.min.time().replace(tzinfo=timezone.utc)
+            min_time = datetime.combine(min_date, temp_min_time)
+
         max_date = self.config.get_max_date()
         if max_date is None:
-            max_time = datetime.max
+            max_time = datetime.max.replace(tzinfo=timezone.utc)
         else:
-            max_time = datetime.combine(max_date, datetime.max.time())
+            temp_max_time = datetime.max.time().replace(tzinfo=timezone.utc)
+            max_time = datetime.combine(max_date, temp_max_time)
         kwargs["min_time"] = (None, max_time)
         kwargs["max_time"] = (min_time, None)
         if self.min_speed is not None:
