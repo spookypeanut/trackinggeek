@@ -107,7 +107,7 @@ class Track(object):
                 msg = "Internal error: bound '%s' is still not present" % name
                 raise AttributeError(msg)
             return getattr(self, private_attr)
-        raise KeyError("%s property doesn't exist" % name)
+        raise AttributeError("%s property doesn't exist" % name)
 
     @property
     def min_date(self):
