@@ -324,6 +324,10 @@ class TrackLibraryDB(object):
         min_template = "%s >= ?"
         max_template = "%s <= ?"
         for key, value in kwargs.items():
+            if key == "namefilter":
+                # TODO: This could be more specific
+                clauses.append(("path like ?", "%%%s%%" % value))
+                continue
             param_class = value[0].__class__
             if param_class in _CONVERTER:
                 converter = _CONVERTER[param_class][0]

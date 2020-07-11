@@ -265,4 +265,8 @@ class GenericImageOutput(object):
         if self.max_speed is not None:
             kwargs["min_speed"] = (None, self.max_speed)
 
+        namefilter = self.config.get_namefilter()
+        if namefilter is not None:
+            kwargs["namefilter"] = namefilter
+
         self.tracks = self.track_library.get_tracks(**kwargs)

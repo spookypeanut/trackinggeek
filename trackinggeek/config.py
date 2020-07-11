@@ -133,6 +133,13 @@ class Config(ConfigParser):
         except ConfigError:
             return None
 
+    def get_namefilter(self, override=None):
+        try:
+            return self._generic_single_getter("input", "namefilter",
+                                                override)
+        except ConfigError:
+            return None
+
     def get_basecolour(self, override=None):
         try:
             result = self._generic_multi_getter("drawing", "basecolour",
