@@ -24,7 +24,7 @@ DEFAULT_SIZE = 1024
 
 class GenericImageOutput(object):
     def __init__(self, latitude_range=None, longitude_range=None,
-                 elevation_range=None, speed_range=None,
+                 elevation_range=None, speed_range=None, time_range=None,
                  pixel_dimensions=None, config=None):
         # TODO: Have ability to override the automatic lat/long range
         if latitude_range:
@@ -57,6 +57,13 @@ class GenericImageOutput(object):
         else:
             self.min_speed = None
             self.max_speed = None
+
+        # TODO: Have these settable in the config
+        if time_range:
+            self.start_time, self.end_time = time_range
+        else:
+            self.start_time = None
+            self.end_time = None
         self.old_track_library = OldTrackLibrary()
 
     def draw(self):
@@ -76,6 +83,8 @@ class GenericImageOutput(object):
             self._detect_speeds()
         if self.min_elevation is None:
             self._detect_elevations()
+        if self.start_time is None:
+            self._detect_time()
         self._calc_pixel_dimensions(self.pixel_dimensions)
 
     def _calc_pixel_dimensions(self, pixel_dimensions):
@@ -138,6 +147,25 @@ class GenericImageOutput(object):
         self.min_speed = currmin
         self.max_speed = currmax
         print("Detected range is %s - %s" % (currmin, currmax))
+
+    def _detect_time(self):
+        if self.config.colour_is_constant() and \
+                self.config.linewidth_is_constant():
+            print("Time range detection not required")
+            return
+        currmin = None
+        currmax = None
+        print("Detecting start & end times (%s tracks)" % len(self.tracks))
+        for path in self.tracks:
+            if not currmin:
+                currmin = path.min_time
+                currmax = path.max_time
+                continue
+            currmin = min(currmin, path.min_time)
+            currmax = max(currmax, path.max_time)
+        self.start_time = currmin.replace(tzinfo=timezone.utc)
+        self.end_time = currmax.replace(tzinfo=timezone.utc)
+        print("Detected range is %s - %s" % (self.start_time, self.end_time))
 
     def add_track(self, path):
         tl = self.old_track_library

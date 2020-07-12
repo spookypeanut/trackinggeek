@@ -26,7 +26,7 @@ class Canvas(object):
     in a selection of formats
     """
     def __init__(self, resolution, latitude_range, longitude_range,
-                 speed_range, elevation_range, config):
+                 speed_range, elevation_range, time_range, config):
         self.pixel_width, self.pixel_height = resolution
         self.min_merc_latitude, self.max_merc_latitude = map(mercator_adjust,
                                                              latitude_range)
@@ -35,6 +35,7 @@ class Canvas(object):
         self.min_longitude, self.max_longitude = longitude_range
         self.min_speed, self.max_speed = speed_range
         self.min_elevation, self.max_elevation = elevation_range
+        self.start_time, self.end_time = time_range
         self.config = config
         self.setup_context()
 
@@ -81,6 +82,7 @@ class Canvas(object):
                                                      first.longitude))
             self.ctx.move_to(*pixels)
             previous_point = first
+            starttime = None
 
             for eachpoint in point_generator:
                 next_point = Point(eachpoint.latitude,
@@ -91,8 +93,16 @@ class Canvas(object):
                     continue
                 speed = eachpoint.speed_between(previous_point)
                 elevation = eachpoint.elevation
-                current_colour = self._get_colour(speed, elevation)
-                current_width = self._get_linewidth(speed, elevation)
+                pointtime = eachpoint.time
+                if starttime is None:
+                    starttime = pointtime
+                # pointtime = eachpoint.
+                kwargs = {"speed": speed,
+                          "elevation": elevation,
+                          "starttime": starttime,
+                          "pointtime": pointtime}
+                current_colour = self._get_colour(**kwargs)
+                current_width = self._get_linewidth(**kwargs)
                 self.ctx.set_source_rgb(*current_colour)  # Solid color
                 self.ctx.set_line_cap(cairo.LINE_CAP_ROUND)
                 self.ctx.set_line_join(cairo.LINE_JOIN_ROUND)
@@ -109,7 +119,7 @@ class Canvas(object):
                 self.ctx.set_line_width(1.0 / self.pixel_width)
                 self.ctx.stroke()
 
-    def _get_colour(self, speed, elevation):
+    def _get_colour(self, **kwargs):
         lw_type = self.config.get_colour_type()
         if lw_type == "constant":
             return(self.config.get_colour())
@@ -119,6 +129,7 @@ class Canvas(object):
             print("Warning: no palette in config")
             palette = DEFAULT_PALETTE
         if lw_type == "elevation":
+            elevation = kwargs["elevation"]
             if elevation > self.max_elevation:
                 return palette.interpolate(1.0)
             if elevation < self.min_elevation:
@@ -127,6 +138,7 @@ class Canvas(object):
                        (self.max_elevation - self.min_elevation)
             return palette.interpolate(fraction)
         if lw_type == "speed":
+            speed = kwargs["speed"]
             if speed is None:
                 return palette.interpolate(0.0)
             if speed > self.max_speed:
@@ -136,15 +148,25 @@ class Canvas(object):
             fraction = (speed - self.min_speed) / \
                        (self.max_speed - self.min_speed)
             return palette.interpolate(fraction)
+        if lw_type in ["pointtime", "starttime"]:
+            starttime = kwargs[lw_type]
+            if starttime > self.end_time:
+                return palette.interpolate(1.0)
+            if starttime < self.start_time:
+                return palette.interpolate(0.0)
+            fraction = (starttime - self.start_time) / \
+                       (self.end_time - self.start_time)
+            return palette.interpolate(fraction)
         raise NotImplementedError
 
-    def _get_linewidth(self, speed, elevation):
+    def _get_linewidth(self, **kwargs):
         lw_type = self.config.get_linewidth_type()
         if lw_type == "constant":
             return(self.config.get_linewidth())
         lw_min = self.config.get_linewidth_min()
         lw_max = self.config.get_linewidth_max()
         if lw_type == "elevation":
+            elevation = kwargs["elevation"]
             if elevation > self.max_elevation:
                 return lw_max
             if elevation < self.min_elevation:
@@ -154,6 +176,7 @@ class Canvas(object):
             width = lw_min + fraction * (lw_max - lw_min)
             return(width)
         if lw_type == "speed":
+            speed = kwargs["speed"]
             if speed > self.max_speed:
                 return lw_max
             if speed < self.min_speed:
@@ -162,7 +185,6 @@ class Canvas(object):
                              (self.max_speed - self.min_speed)
             width = lw_min + fraction * (lw_max - lw_min)
             return(width)
-
         raise NotImplementedError
 
     def draw_tracks(self, paths):

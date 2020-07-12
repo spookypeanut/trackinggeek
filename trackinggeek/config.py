@@ -154,7 +154,7 @@ class Config(ConfigParser):
         """ Get the type of variation in the linewidth
         """
         value = self._generic_single_getter("drawing", "colour", override)
-        if value in ("elevation", "speed"):
+        if value in ("elevation", "speed", "starttime", "pointtime"):
             return value
         try:
             value = self._generic_multi_getter("drawing", "colour", override)

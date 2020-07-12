@@ -68,6 +68,7 @@ class Timelapse(GenericImageOutput):
                       longitude_range=self.longitude_range,
                       speed_range=self.speed_range,
                       elevation_range=self.elevation_range,
+                      time_range=self.time_range,
                       config=self.config)
 
     def _prepare_frames(self):

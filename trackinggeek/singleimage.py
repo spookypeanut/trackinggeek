@@ -1,16 +1,16 @@
 # Tracking Geek: A tool for visualizing swathes of gpx files at once
 # Copyright (C) 2012, Henry Bush
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -35,11 +35,13 @@ class SingleImage(GenericImageOutput):
         longitude_range = (self.min_longitude, self.max_longitude)
         elevation_range = (self.min_elevation, self.max_elevation)
         speed_range = (self.min_speed, self.max_speed)
+        time_range = (self.start_time, self.end_time)
         self.canvas = Canvas(resolution=resolution,
                              latitude_range=latitude_range,
                              longitude_range=longitude_range,
                              speed_range=speed_range,
                              elevation_range=elevation_range,
+                             time_range=time_range,
                              config=self.config)
 
         self.canvas.draw_tracks(self.tracks)
