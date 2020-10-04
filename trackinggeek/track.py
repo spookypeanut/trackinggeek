@@ -62,7 +62,12 @@ class Track(object):
                 raise OSError("%s doesn't exist" % path)
             try:
                 with open(path, "r") as gpx_file:
-                    return gpxpy.parse(gpx_file)
+                    parsed = gpxpy.parse(gpx_file)
+                if parsed is None:
+                    raise ValueError("Parsing track returned None")
+                if parsed.get_points_no() == 0:
+                    raise ValueError("Track contains no points")
+                return parsed
             except:
                 # We can do a bare except, as we're re-raising
                 print("Errored path: %s" % path)
@@ -84,8 +89,12 @@ class Track(object):
 
     def _extract_stats_from_gpx(self):
         parsed = self.get_parsed()
+        bounds = parsed.get_bounds()
+        if bounds is None:
+            msg = "Bounds are None. Invalid track? %s"
+            raise ValueError(msg % self._get_filepath())
         self._min_latitude, self._max_latitude, \
-            self._min_longitude, self._max_longitude = parsed.get_bounds()
+            self._min_longitude, self._max_longitude = bounds
         self._min_elevation, self._max_elevation = \
             parsed.get_elevation_extremes()
         self._min_time, self._max_time = parsed.get_time_bounds()
