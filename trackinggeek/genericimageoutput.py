@@ -297,4 +297,10 @@ class GenericImageOutput(object):
         if namefilter is not None:
             kwargs["namefilter"] = namefilter
 
+        nameregex = self.config.get_nameregex()
+        if nameregex is not None:
+            if namefilter is not None:
+                print("WARNING: Both filter and regex specified")
+            kwargs["nameregex"] = nameregex
+
         self.tracks = self.track_library.get_tracks(**kwargs)

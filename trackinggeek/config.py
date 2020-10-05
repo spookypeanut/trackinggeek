@@ -133,6 +133,13 @@ class Config(ConfigParser):
         except ConfigError:
             return None
 
+    def get_nameregex(self, override=None):
+        try:
+            return self._generic_single_getter("input", "nameregex",
+                                                override)
+        except ConfigError:
+            return None
+
     def get_namefilter(self, override=None):
         try:
             return self._generic_single_getter("input", "namefilter",

@@ -1,3 +1,4 @@
+import re
 import os
 import sqlite3
 from datetime import date, datetime, timedelta, timezone
@@ -327,6 +328,12 @@ class TrackLibraryDB(object):
             if key == "namefilter":
                 # TODO: This could be more specific
                 clauses.append(("path like ?", "%%%s%%" % value))
+                continue
+            if key == "nameregex":
+                def regexp(y, x, search=re.search):
+                    return 1 if search(y, x) else 0
+                self._conn.create_function('regexp', 2, regexp)
+                clauses.append(("path regexp ?", value))
                 continue
             param_class = value[0].__class__
             if param_class in _CONVERTER:
